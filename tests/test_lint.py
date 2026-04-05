@@ -99,6 +99,55 @@ def test_lint_reports_alias_collisions():
     assert any(f.code == "ALIAS_COLLISION" for f in findings)
 
 
+def test_lint_resolves_filename_and_relative_path_links():
+    pages = [
+        PageRecord(
+            path="Agent相关论文/REACT_ SYNERGIZING REASONING AND ACTING IN LANGUAGE MODELS-2023.3.md",
+            title="ReAct Paper",
+            body="",
+            frontmatter={"role": "raw_source", "layer": "source", "summary": "ReAct source."},
+        ),
+        PageRecord(
+            path="wiki/concepts/Agent设计模式.md",
+            title="Agent设计模式",
+            body="[[Agent相关论文/REACT_ SYNERGIZING REASONING AND ACTING IN LANGUAGE MODELS-2023.3.md]]",
+            frontmatter={"role": "concept", "layer": "wiki", "summary": "Agent patterns."},
+        ),
+        PageRecord(
+            path="wiki/INDEX.md",
+            title="INDEX",
+            body="[[Agent设计模式]]",
+            frontmatter={"role": "index", "layer": "wiki", "summary": "Index."},
+        ),
+    ]
+
+    findings = lint_pages(pages)
+
+    assert findings == []
+
+
+def test_lint_ignores_folderish_and_code_block_pseudo_links():
+    pages = [
+        PageRecord(
+            path="wiki/concepts/RAG与知识增强.md",
+            title="RAG与知识增强",
+            body=(
+                "See [[output/reports/]].\n\n"
+                "tokens = [[\"to\"]]\n\n"
+                "embeddings = [[instruction, sentence]]\n\n"
+                "```python\n"
+                "weights = [[0.12, 0.45]]\n"
+                "```\n"
+            ),
+            frontmatter={"role": "concept", "layer": "wiki", "summary": "RAG."},
+        ),
+    ]
+
+    findings = lint_pages(pages)
+
+    assert findings == [f for f in findings if f.code == "ORPHAN_PAGE"]
+
+
 def test_example_vault_has_no_lint_findings():
     repo_root = Path(__file__).resolve().parents[1]
     pages = scan_markdown_files(repo_root / "examples" / "minimal-vault")

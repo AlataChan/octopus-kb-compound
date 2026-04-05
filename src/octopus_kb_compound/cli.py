@@ -6,6 +6,7 @@ import sys
 
 from octopus_kb_compound.links import suggest_links
 from octopus_kb_compound.lint import lint_pages
+from octopus_kb_compound.profile import load_vault_profile
 from octopus_kb_compound.vault import load_page, scan_markdown_files
 
 
@@ -33,7 +34,8 @@ def main(argv: list[str] | None = None) -> int:
         if not args.vault.is_dir():
             print(f"Vault is not a directory: {args.vault}", file=sys.stderr)
             return 2
-        pages = scan_markdown_files(args.vault)
+        profile = load_vault_profile(args.vault)
+        pages = scan_markdown_files(args.vault, profile)
         findings = lint_pages(pages)
         for finding in findings:
             print(f"{finding.code}\t{finding.path}\t{finding.message}")
@@ -49,8 +51,9 @@ def main(argv: list[str] | None = None) -> int:
         if not args.page.exists():
             print(f"Page does not exist: {args.page}", file=sys.stderr)
             return 2
-        pages = scan_markdown_files(args.vault)
-        target_page = load_page(args.page)
+        profile = load_vault_profile(args.vault)
+        pages = scan_markdown_files(args.vault, profile)
+        target_page = load_page(args.page, root=args.vault)
         suggestions = suggest_links(target_page.body, pages, current_title=target_page.title)
         for suggestion in suggestions:
             print(f"{suggestion.target_title}\t{suggestion.anchor_text}\t{suggestion.reason}")

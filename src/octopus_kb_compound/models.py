@@ -40,3 +40,10 @@ class LintFinding:
     code: str
     path: str
     message: str
+
+
+@dataclass(slots=True)
+class VaultProfile:
+    schema: str | None = None
+    index: str | None = None
+    exclude_globs: list[str] = field(default_factory=list)

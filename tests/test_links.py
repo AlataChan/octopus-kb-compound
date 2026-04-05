@@ -79,3 +79,19 @@ def test_build_alias_index_ignores_ambiguous_alias_and_reports_collision():
 
     assert "sharedalias" not in alias_index
     assert collisions["sharedalias"] == ["Page A", "Page B"]
+
+
+def test_build_alias_index_includes_filename_and_relative_path_aliases():
+    pages = [
+        PageRecord(
+            path="Agent相关论文/REACT_ SYNERGIZING REASONING AND ACTING IN LANGUAGE MODELS-2023.3.md",
+            title="ReAct Paper",
+            body="",
+            frontmatter={},
+        ),
+    ]
+
+    alias_index = build_alias_index(pages)
+
+    assert alias_index["reactsynergizingreasoningandactinginlanguagemodels20233md"] == "ReAct Paper"
+    assert alias_index["agent相关论文reactsynergizingreasoningandactinginlanguagemodels20233"] == "ReAct Paper"

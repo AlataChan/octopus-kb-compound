@@ -4,5 +4,6 @@
 - `skills/`: reusable LLM skills
 - `prompts/`: prompt packs and policy docs
 - `docs/`: architecture and setup docs
+- `scripts/`: bootstrap utilities for real vaults
 - `examples/minimal-vault/`: runnable example vault with schema, index, concept, entity, and raw pages
 - `tests/`: pytest suite

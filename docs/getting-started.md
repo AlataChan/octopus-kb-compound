@@ -5,6 +5,7 @@
 3. Use `octopus-kb lint <vault>` to inspect metadata and graph issues.
 4. Use the prompt pack to standardize retrieval and maintenance behavior in your LLM agent.
 5. Start from `examples/minimal-vault/` if you want a working graph-shaped seed vault.
+6. Use `scripts/bootstrap_vault.py` if you want to adopt the framework in an existing vault.
 
 ## Suggested First Run
 

@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from octopus_kb_compound.profile import VaultProfile
 from octopus_kb_compound.vault import load_page, scan_markdown_files
 
 
@@ -24,3 +25,16 @@ def test_load_page_replaces_invalid_utf8_bytes(tmp_path: Path):
 
     assert page.title.startswith("Bad")
     assert "\ufffd" in page.title
+
+
+def test_scan_markdown_files_respects_profile_excludes(tmp_path: Path):
+    included = tmp_path / "wiki" / "note.md"
+    excluded = tmp_path / "output" / "report.md"
+    included.parent.mkdir(parents=True)
+    excluded.parent.mkdir(parents=True)
+    included.write_text("# wiki\n", encoding="utf-8")
+    excluded.write_text("# report\n", encoding="utf-8")
+
+    pages = scan_markdown_files(tmp_path, VaultProfile(exclude_globs=["output/**"]))
+
+    assert [Path(page.path).as_posix() for page in pages] == ["wiki/note.md"]

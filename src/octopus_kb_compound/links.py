@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from pathlib import PurePosixPath
 
 from octopus_kb_compound.models import LinkSuggestion, PageRecord
 
@@ -83,7 +84,17 @@ def _page_aliases(page: PageRecord) -> list[str]:
     raw_aliases = page.frontmatter.get("aliases", [])
     if isinstance(raw_aliases, list):
         aliases.extend(str(item) for item in raw_aliases)
+    aliases.extend(_path_aliases(page.path))
     return _dedupe_preserve_order(aliases)
+
+
+def _path_aliases(path: str) -> list[str]:
+    pure_path = PurePosixPath(path)
+    aliases = [pure_path.name, pure_path.stem]
+    if len(pure_path.parts) > 1:
+        aliases.append(str(pure_path.with_suffix("")))
+        aliases.append(str(pure_path))
+    return aliases
 
 
 def _collect_alias_targets(pages: list[PageRecord]) -> dict[str, list[str]]:

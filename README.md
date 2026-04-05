@@ -37,6 +37,7 @@ octopus-kb-compound/
 │   └── kb-maintain/
 ├── prompts/
 │   └── obsidian-graph/
+├── scripts/
 ├── src/octopus_kb_compound/
 ├── examples/minimal-vault/
 ├── docs/
@@ -98,6 +99,13 @@ The skill treats the wiki as a living artifact, not a pile of notes.
 - `CONTRIBUTING.md`: contribution workflow and standards
 - `docs/roadmap.md`: next milestones for the framework
 - `docs/architecture.md`: operating model and layer boundaries
+- `docs/production-vault.md`: how to adopt the framework in an existing vault
+- `docs/releases/v0.1.0.md`: first release notes
+- `CHANGELOG.md`: release history
+
+## Production Vaults
+
+For real Obsidian vaults, create a root `AGENTS.md`, a root `.octopus-kb.yml`, and a `wiki/LOG.md`. The repository includes `scripts/bootstrap_vault.py` to bootstrap those files.
 
 ## Status
 
