@@ -4,6 +4,7 @@ import argparse
 from pathlib import Path
 import sys
 
+from octopus_kb_compound import ingest
 from octopus_kb_compound.links import suggest_links
 from octopus_kb_compound.lint import lint_pages
 from octopus_kb_compound.profile import load_vault_profile
@@ -20,6 +21,12 @@ def build_parser() -> argparse.ArgumentParser:
     suggest_parser = subparsers.add_parser("suggest-links", help="Suggest wikilinks for a page using a vault index.")
     suggest_parser.add_argument("page", type=Path)
     suggest_parser.add_argument("--vault", required=True, type=Path)
+
+    ingest_parser = subparsers.add_parser("ingest-url", help="Fetch a public URL and write it into raw/ as a markdown source.")
+    ingest_parser.add_argument("url")
+    ingest_parser.add_argument("--vault", required=True, type=Path)
+    ingest_parser.add_argument("--tags", default="")
+    ingest_parser.add_argument("--lang", default="zh")
     return parser
 
 
@@ -59,8 +66,36 @@ def main(argv: list[str] | None = None) -> int:
             print(f"{suggestion.target_title}\t{suggestion.anchor_text}\t{suggestion.reason}")
         return 0
 
+    if args.command == "ingest-url":
+        if not args.vault.exists():
+            print(f"Vault does not exist: {args.vault}", file=sys.stderr)
+            return 2
+        if not args.vault.is_dir():
+            print(f"Vault is not a directory: {args.vault}", file=sys.stderr)
+            return 2
+
+        try:
+            body, metadata = ingest.fetch_url_as_markdown(args.url)
+            output_path = ingest.generate_raw_page(
+                body,
+                metadata,
+                args.vault / "raw",
+                lang=args.lang,
+                tags=_parse_tags(args.tags),
+            )
+        except (OSError, RuntimeError, ValueError) as exc:
+            print(str(exc), file=sys.stderr)
+            return 2
+
+        print(output_path)
+        return 0
+
     parser.error("Unknown command")
     return 2
+
+
+def _parse_tags(raw_tags: str) -> list[str]:
+    return [tag.strip() for tag in raw_tags.split(",") if tag.strip()]
 
 
 if __name__ == "__main__":

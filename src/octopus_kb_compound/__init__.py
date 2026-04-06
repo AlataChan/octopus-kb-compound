@@ -2,6 +2,7 @@
 
 __all__ = [
     "frontmatter",
+    "ingest",
     "links",
     "lint",
     "models",

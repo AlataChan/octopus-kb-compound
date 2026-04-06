@@ -4,8 +4,9 @@ Open-source framework for building self-growing, self-maintaining LLM knowledge 
 
 `octopus-kb-compound` is for teams and individuals who want something stronger than ad-hoc RAG. Instead of re-deriving knowledge from raw documents on every query, the LLM maintains a persistent wiki with frontmatter, wikilinks, concept pages, and health checks.
 
-This repository packages three operator-facing assets:
+This repository packages four operator-facing assets:
 
+- `kb-ingest`: an acquisition skill for fetching public URLs into `raw/*.md`
 - `kb-retrieve`: a retrieval skill for evidence-backed question answering
 - `kb-maintain`: a maintenance skill for ingest, updates, links, and lint
 - `obsidian-graph`: a prompt pack and policy set for stable wikilinks and graph hygiene
@@ -33,6 +34,7 @@ The repository assumes a three-layer vault:
 ```text
 octopus-kb-compound/
 ├── skills/
+│   ├── kb-ingest/
 │   ├── kb-retrieve/
 │   └── kb-maintain/
 ├── prompts/
@@ -72,6 +74,12 @@ Use when the LLM should answer from the knowledge base by following:
 
 The skill keeps answers evidence-backed and gap-aware.
 
+### `kb-ingest`
+
+Use when a public URL needs to become a new raw source page in the vault.
+
+The skill stops at `raw/*.md`. It does not update concept pages, indexes, or logs.
+
 ### `kb-maintain`
 
 Use when ingesting sources, updating concept pages, refreshing frontmatter, adding links, or linting the graph.
@@ -80,8 +88,11 @@ The skill treats the wiki as a living artifact, not a pile of notes.
 
 ## What The CLI Does
 
+- `ingest-url <url> --vault <path> [--tags tag1,tag2] [--lang zh]`: fetch a public URL through Jina Reader and write a new `raw/*.md` page
 - `lint <vault>`: find broken links, orphan concept pages, and missing metadata
 - `suggest-links <page> --vault <vault>`: propose canonical wikilinks for an existing page
+
+`ingest-url` uses `https://r.jina.ai/` as a third-party conversion service. Only public `http/https` URLs are allowed, and the command rejects localhost and private-network targets.
 
 ## Example Vault
 

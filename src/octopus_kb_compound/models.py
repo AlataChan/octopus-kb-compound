@@ -18,6 +18,12 @@ class PageMeta:
     published: str | None = None
     authors: list[str] | None = None
     aliases: list[str] | None = None
+    source_url: str | None = None
+    source_file: str | None = None
+    original_format: str | None = None
+    ingest_method: str | None = None
+    fetched_at: str | None = None
+    converted_at: str | None = None
 
 
 @dataclass(slots=True)

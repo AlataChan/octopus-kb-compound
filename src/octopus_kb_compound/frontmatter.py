@@ -41,6 +41,18 @@ def render_frontmatter(meta: PageMeta) -> str:
             lines.append(f"  - {tag}")
     else:
         lines.append("tags: []")
+    if meta.source_url:
+        lines.append(f'source_url: "{_quote(meta.source_url)}"')
+    if meta.source_file:
+        lines.append(f'source_file: "{_quote(meta.source_file)}"')
+    if meta.original_format:
+        lines.append(f"original_format: {meta.original_format}")
+    if meta.ingest_method:
+        lines.append(f"ingest_method: {meta.ingest_method}")
+    if meta.fetched_at:
+        lines.append(f'fetched_at: "{_quote(meta.fetched_at)}"')
+    if meta.converted_at:
+        lines.append(f'converted_at: "{_quote(meta.converted_at)}"')
     if meta.summary is not None:
         summary = meta.summary.strip()
         if summary:

@@ -2,6 +2,7 @@
 
 ## Near Term
 
+- Expand `kb-ingest` with local file conversion through an optional dependency while keeping the core package standard-library only.
 - Add richer frontmatter helpers for entities, aliases, and change logs.
 - Expand lint to catch duplicate canonical pages and unresolved aliases.
 - Add CLI support for vault summaries and impacted-page reporting.
