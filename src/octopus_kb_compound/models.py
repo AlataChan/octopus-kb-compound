@@ -24,6 +24,11 @@ class PageMeta:
     ingest_method: str | None = None
     fetched_at: str | None = None
     converted_at: str | None = None
+    canonical_name: str | None = None
+    status: str | None = None
+    source_of_truth: str | None = None
+    related_entities: list[str] = field(default_factory=list)
+    changelog: list[str] = field(default_factory=list)
 
 
 @dataclass(slots=True)

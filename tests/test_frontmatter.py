@@ -1,5 +1,12 @@
 from octopus_kb_compound.frontmatter import parse_document, render_frontmatter
 from octopus_kb_compound.models import PageMeta
+from octopus_kb_compound.page_types import (
+    make_changelog_meta,
+    make_comparison_meta,
+    make_concept_meta,
+    make_entity_meta,
+    make_timeline_meta,
+)
 
 
 def test_render_frontmatter_writes_role_layer_and_workflow():
@@ -93,3 +100,43 @@ def test_render_frontmatter_escapes_backslashes_and_whitespace_summary():
     assert 'summary: ""' in frontmatter
     assert parsed["title"] == r"Path C:\Users"
     assert parsed["summary"] == ""
+
+
+def test_make_entity_meta_renders_expected_fields():
+    meta = make_entity_meta(
+        "Vector Store",
+        aliases=["Vector Database"],
+        related_entities=["Chunking"],
+        summary="Canonical entity page.",
+    )
+
+    frontmatter = render_frontmatter(meta)
+    parsed, _ = parse_document(frontmatter + "\n# Vector Store\n")
+
+    assert meta.page_type == "entity"
+    assert isinstance(meta, PageMeta)
+    assert "type: entity" in frontmatter
+    assert 'canonical_name: "Vector Store"' in frontmatter
+    assert "status: active" in frontmatter
+    assert "source_of_truth: canonical" in frontmatter
+    assert "related_entities:" in frontmatter
+    assert "  - Chunking" in frontmatter
+    assert "aliases:" in frontmatter
+    assert parsed["canonical_name"] == "Vector Store"
+    assert parsed["related_entities"] == ["Chunking"]
+
+
+def test_page_type_helpers_create_standard_metadata():
+    concept = make_concept_meta("RAG", aliases=["retrieval augmented generation"])
+    comparison = make_comparison_meta("Vector DB vs Graph DB", related_entities=["Vector Store", "Knowledge Graph"])
+    timeline = make_timeline_meta("RAG Timeline", related_entities=["RAG"])
+    changelog = make_changelog_meta("LOG", changelog=["2026-04-14: normalized aliases"])
+
+    assert concept.page_type == "concept"
+    assert concept.role == "concept"
+    assert comparison.page_type == "comparison"
+    assert comparison.related_entities == ["Vector Store", "Knowledge Graph"]
+    assert timeline.page_type == "timeline"
+    assert timeline.status == "active"
+    assert changelog.page_type == "log"
+    assert changelog.changelog == ["2026-04-14: normalized aliases"]

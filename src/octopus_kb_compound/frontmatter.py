@@ -19,6 +19,12 @@ def render_frontmatter(meta: PageMeta) -> str:
         lines.append(f"role: {meta.role}")
     if meta.layer:
         lines.append(f"layer: {meta.layer}")
+    if meta.canonical_name:
+        lines.append(f'canonical_name: "{_quote(meta.canonical_name)}"')
+    if meta.status:
+        lines.append(f"status: {meta.status}")
+    if meta.source_of_truth:
+        lines.append(f"source_of_truth: {meta.source_of_truth}")
     if meta.workflow:
         lines.append("workflow:")
         for item in meta.workflow:
@@ -31,6 +37,14 @@ def render_frontmatter(meta: PageMeta) -> str:
         lines.append("aliases:")
         for alias in meta.aliases:
             lines.append(f'  - "{_quote(alias)}"')
+    if meta.related_entities:
+        lines.append("related_entities:")
+        for entity in meta.related_entities:
+            lines.append(f"  - {entity}")
+    if meta.changelog:
+        lines.append("changelog:")
+        for entry in meta.changelog:
+            lines.append(f'  - "{_quote(entry)}"')
     if meta.publisher:
         lines.append(f'publisher: "{_quote(meta.publisher)}"')
     if meta.published:

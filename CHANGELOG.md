@@ -5,6 +5,7 @@
 ### Added
 
 - Roadmap implementation execution plan and CLI baseline regression guard.
+- Structured page metadata helpers for concept, entity, comparison, timeline, and changelog pages.
 
 ## v0.1.0 - 2026-04-05
 

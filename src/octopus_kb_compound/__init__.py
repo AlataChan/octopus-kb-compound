@@ -6,5 +6,6 @@ __all__ = [
     "links",
     "lint",
     "models",
+    "page_types",
     "vault",
 ]
