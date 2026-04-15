@@ -1,6 +1,18 @@
 from pathlib import Path
 
-from octopus_kb_compound.cli import main
+from octopus_kb_compound.cli import build_parser, main
+
+
+def test_cli_parser_includes_existing_baseline_commands():
+    parser = build_parser()
+    subparsers_action = next(
+        action
+        for action in parser._actions
+        if getattr(action, "dest", None) == "command"
+    )
+    commands = set(subparsers_action.choices)
+
+    assert {"lint", "suggest-links", "ingest-url", "ingest-file"} <= commands
 
 
 def test_cli_lint_missing_vault_returns_error(tmp_path: Path, capsys):

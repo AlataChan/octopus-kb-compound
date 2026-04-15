@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Roadmap implementation execution plan and CLI baseline regression guard.
+
 ## v0.1.0 - 2026-04-05
 
 First public release of `octopus-kb-compound`.
