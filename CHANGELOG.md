@@ -8,6 +8,8 @@
 - Structured page metadata helpers for concept, entity, comparison, timeline, and changelog pages.
 - Lint checks for duplicate canonical pages, unresolved frontmatter aliases, and canonical alias collisions.
 - `vault-summary` CLI command for deterministic vault counts, entry presence, and lint finding summaries.
+- `impacted-pages` CLI command for deterministic maintenance impact discovery.
+- Version bump to `0.2.0` for the expanded public CLI and metadata/lint contract.
 
 ## v0.1.0 - 2026-04-05
 

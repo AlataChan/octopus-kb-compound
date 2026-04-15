@@ -12,7 +12,7 @@ def test_cli_parser_includes_existing_baseline_commands():
     )
     commands = set(subparsers_action.choices)
 
-    assert {"lint", "suggest-links", "ingest-url", "ingest-file", "vault-summary"} <= commands
+    assert {"lint", "suggest-links", "ingest-url", "ingest-file", "vault-summary", "impacted-pages"} <= commands
 
 
 def test_cli_lint_missing_vault_returns_error(tmp_path: Path, capsys):
@@ -78,3 +78,29 @@ def test_cli_vault_summary_reports_structure(tmp_path: Path, capsys):
     assert "type\traw_source\t1" in captured.out
     assert "role\tconcept\t1" in captured.out
     assert "entry\tschema\tpresent" in captured.out
+
+
+def test_cli_impacted_pages_reports_related_pages(tmp_path: Path, capsys):
+    concept = tmp_path / "wiki" / "concepts" / "RAG.md"
+    entity = tmp_path / "wiki" / "entities" / "Vector Store.md"
+    index = tmp_path / "wiki" / "INDEX.md"
+    log = tmp_path / "wiki" / "LOG.md"
+    for path in (concept, entity, index, log):
+        path.parent.mkdir(parents=True, exist_ok=True)
+    concept.write_text(
+        "---\ntitle: RAG\nrole: concept\nlayer: wiki\nsummary: RAG\nrelated_entities:\n  - Vector Store\n---\n[[Vector Store]]\n",
+        encoding="utf-8",
+    )
+    entity.write_text("---\ntitle: Vector Store\nrole: entity\nlayer: wiki\nsummary: Vector\n---\n", encoding="utf-8")
+    index.write_text("---\ntitle: INDEX\nrole: index\nlayer: wiki\nsummary: Index\n---\n[[RAG]]\n", encoding="utf-8")
+    log.write_text("---\ntitle: LOG\nrole: log\nlayer: wiki\nsummary: Log\n---\n", encoding="utf-8")
+
+    exit_code = main(["impacted-pages", str(concept), "--vault", str(tmp_path)])
+
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "wiki/concepts/RAG.md" in captured.out
+    assert "wiki/INDEX.md" in captured.out
+    assert "wiki/LOG.md" in captured.out
+    assert "wiki/entities/Vector Store.md" in captured.out

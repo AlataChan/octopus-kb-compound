@@ -2,6 +2,7 @@
 
 __all__ = [
     "frontmatter",
+    "impact",
     "ingest",
     "links",
     "lint",
