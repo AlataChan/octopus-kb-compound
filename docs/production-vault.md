@@ -32,3 +32,11 @@ exclude_globs:
 ## Bootstrap
 
 Use `scripts/bootstrap_vault.py` to create the initial entry files in an existing vault. The script is intentionally conservative: it creates missing files and leaves source documents untouched.
+
+## Migration Safety
+
+Use `octopus-kb inspect-vault <vault>` before adopting the operating model. It is read-only and reports missing entry files plus pages that need frontmatter normalization.
+
+Use `octopus-kb normalize-vault <vault>` as a dry run. It does not write files unless `--apply` is provided. With `--apply`, normalized files are written to `.octopus-kb-migration/staging/<timestamp>/` by default and the source vault is left untouched.
+
+In-place normalization requires both `--apply` and `--in-place`. The command creates `.octopus-kb-migration/backups/<timestamp>/` before writing, writes files atomically, and restores from backup on unexpected write failures. Apply mode only normalizes frontmatter and creates required entry files; it does not rewrite markdown bodies.

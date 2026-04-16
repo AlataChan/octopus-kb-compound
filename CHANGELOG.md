@@ -12,6 +12,7 @@
 - Version bump to `0.2.0` for the expanded public CLI and metadata/lint contract.
 - Deterministic retrieval bundle helpers for schema, index, concept, entity, and raw-source traversal.
 - Non-mutating maintenance planner and `plan-maintenance` CLI command for follow-up actions.
+- Vault migration inspection and staged frontmatter normalization commands with conservative safety defaults.
 
 ## v0.1.0 - 2026-04-05
 

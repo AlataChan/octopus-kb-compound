@@ -6,6 +6,7 @@ __all__ = [
     "ingest",
     "links",
     "lint",
+    "migrate",
     "models",
     "page_types",
     "planner",

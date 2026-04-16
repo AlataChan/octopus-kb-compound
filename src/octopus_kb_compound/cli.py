@@ -8,6 +8,7 @@ from octopus_kb_compound import ingest
 from octopus_kb_compound.impact import find_impacted_pages
 from octopus_kb_compound.links import suggest_links
 from octopus_kb_compound.lint import lint_pages
+from octopus_kb_compound.migrate import inspect_vault_for_migration, normalize_vault, render_migration_report
 from octopus_kb_compound.planner import plan_maintenance, render_plan
 from octopus_kb_compound.profile import load_vault_profile
 from octopus_kb_compound.summary import render_summary, summarize_vault
@@ -47,6 +48,14 @@ def build_parser() -> argparse.ArgumentParser:
     plan_parser = subparsers.add_parser("plan-maintenance", help="Plan deterministic wiki maintenance for a changed page.")
     plan_parser.add_argument("page", type=Path)
     plan_parser.add_argument("--vault", required=True, type=Path)
+
+    inspect_parser = subparsers.add_parser("inspect-vault", help="Inspect an existing vault before migration.")
+    inspect_parser.add_argument("vault", type=Path)
+
+    normalize_parser = subparsers.add_parser("normalize-vault", help="Normalize vault frontmatter into staging by default.")
+    normalize_parser.add_argument("vault", type=Path)
+    normalize_parser.add_argument("--apply", action="store_true")
+    normalize_parser.add_argument("--in-place", action="store_true")
     return parser
 
 
@@ -179,6 +188,32 @@ def main(argv: list[str] | None = None) -> int:
 
         print(render_plan(plan_maintenance(args.page, args.vault)))
         return 0
+
+    if args.command == "inspect-vault":
+        if not args.vault.exists():
+            print(f"Vault does not exist: {args.vault}", file=sys.stderr)
+            return 2
+        if not args.vault.is_dir():
+            print(f"Vault is not a directory: {args.vault}", file=sys.stderr)
+            return 2
+        report = inspect_vault_for_migration(args.vault)
+        print(render_migration_report(report))
+        return 2 if report.parse_failures else 0
+
+    if args.command == "normalize-vault":
+        if not args.vault.exists():
+            print(f"Vault does not exist: {args.vault}", file=sys.stderr)
+            return 2
+        if not args.vault.is_dir():
+            print(f"Vault is not a directory: {args.vault}", file=sys.stderr)
+            return 2
+        try:
+            report = normalize_vault(args.vault, apply=args.apply, in_place=args.in_place)
+        except OSError as exc:
+            print(str(exc), file=sys.stderr)
+            return 1
+        print(render_migration_report(report))
+        return 2 if report.parse_failures else 0
 
     parser.error("Unknown command")
     return 2

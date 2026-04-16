@@ -20,6 +20,8 @@ def test_cli_parser_includes_existing_baseline_commands():
         "vault-summary",
         "impacted-pages",
         "plan-maintenance",
+        "inspect-vault",
+        "normalize-vault",
     } <= commands
 
 
@@ -131,3 +133,15 @@ def test_cli_plan_maintenance_reports_actions(tmp_path: Path, capsys):
     assert exit_code == 0
     assert "changed_page\traw/source.md" in captured.out
     assert "action\tupdate" in captured.out
+
+
+def test_cli_inspect_vault_reports_missing_files(tmp_path: Path, capsys):
+    (tmp_path / "note.md").write_text("# Loose note\n", encoding="utf-8")
+
+    exit_code = main(["inspect-vault", str(tmp_path)])
+
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "missing_file\tAGENTS.md" in captured.out
+    assert "missing_frontmatter\tnote.md" in captured.out
