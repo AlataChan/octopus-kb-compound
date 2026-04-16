@@ -6,6 +6,7 @@
 4. Use the prompt pack to standardize retrieval and maintenance behavior in your LLM agent.
 5. Start from `examples/minimal-vault/` if you want a working graph-shaped seed vault.
 6. Use `scripts/bootstrap_vault.py` if you want to adopt the framework in an existing vault.
+7. Use `examples/expanded-vault/` when you need concept, entity, comparison, timeline, log, migration, and export examples in one place.
 
 ## Suggested First Run
 
@@ -15,6 +16,11 @@ source .venv/bin/activate
 python -m pip install -e '.[dev]'
 python -m pytest -q
 python -m octopus_kb_compound.cli lint examples/minimal-vault
+python -m octopus_kb_compound.cli vault-summary examples/expanded-vault
+python -m octopus_kb_compound.cli plan-maintenance \
+  examples/expanded-vault/raw/rag-operations-source.md \
+  --vault examples/expanded-vault
+python -m octopus_kb_compound.cli export-graph examples/expanded-vault --out /tmp/octopus-expanded-export
 python -m octopus_kb_compound.cli suggest-links \
   examples/minimal-vault/wiki/concepts/'RAG and Knowledge Augmentation.md' \
   --vault examples/minimal-vault

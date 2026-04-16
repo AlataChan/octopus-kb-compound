@@ -6,4 +6,5 @@
 - `docs/`: architecture and setup docs
 - `scripts/`: bootstrap utilities for real vaults
 - `examples/minimal-vault/`: runnable example vault with schema, index, concept, entity, and raw pages
+- `examples/expanded-vault/`: larger example vault with concept, entity, comparison, timeline, log, and raw-source pages
 - `tests/`: pytest suite

@@ -54,3 +54,16 @@ def test_summarize_vault_counts_pages_by_type_role_and_layer():
     assert summary.entries["schema"] == "present"
     assert summary.entries["index"] == "present"
     assert summary.entries["log"] == "present"
+
+
+def test_expanded_example_vault_contains_expected_page_categories():
+    repo_root = Path(__file__).resolve().parents[1]
+    root = repo_root / "examples" / "expanded-vault"
+
+    assert (root / "AGENTS.md").exists()
+    assert (root / "wiki" / "INDEX.md").exists()
+    assert (root / "wiki" / "LOG.md").exists()
+    assert list((root / "wiki" / "concepts").glob("*.md"))
+    assert list((root / "wiki" / "entities").glob("*.md"))
+    assert list((root / "wiki" / "comparisons").glob("*.md"))
+    assert list((root / "wiki" / "timelines").glob("*.md"))

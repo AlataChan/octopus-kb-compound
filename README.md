@@ -101,7 +101,7 @@ The skill treats the wiki as a living artifact, not a pile of notes.
 
 ## Example Vault
 
-`examples/minimal-vault/` shows the intended shape of a vault:
+`examples/minimal-vault/` shows the intended shape of a vault. `examples/expanded-vault/` adds concept, entity, comparison, timeline, log, and raw-source pages for end-to-end operator workflows.
 
 - `AGENTS.md` as schema
 - `wiki/INDEX.md` as the navigation hub
