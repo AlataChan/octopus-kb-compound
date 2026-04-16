@@ -8,6 +8,7 @@ from octopus_kb_compound import ingest
 from octopus_kb_compound.impact import find_impacted_pages
 from octopus_kb_compound.links import suggest_links
 from octopus_kb_compound.lint import lint_pages
+from octopus_kb_compound.planner import plan_maintenance, render_plan
 from octopus_kb_compound.profile import load_vault_profile
 from octopus_kb_compound.summary import render_summary, summarize_vault
 from octopus_kb_compound.vault import load_page, scan_markdown_files
@@ -42,6 +43,10 @@ def build_parser() -> argparse.ArgumentParser:
     impact_parser = subparsers.add_parser("impacted-pages", help="Report pages likely impacted by a page change.")
     impact_parser.add_argument("page", type=Path)
     impact_parser.add_argument("--vault", required=True, type=Path)
+
+    plan_parser = subparsers.add_parser("plan-maintenance", help="Plan deterministic wiki maintenance for a changed page.")
+    plan_parser.add_argument("page", type=Path)
+    plan_parser.add_argument("--vault", required=True, type=Path)
     return parser
 
 
@@ -159,6 +164,20 @@ def main(argv: list[str] | None = None) -> int:
 
         for path in find_impacted_pages(args.page, args.vault):
             print(path)
+        return 0
+
+    if args.command == "plan-maintenance":
+        if not args.vault.exists():
+            print(f"Vault does not exist: {args.vault}", file=sys.stderr)
+            return 2
+        if not args.vault.is_dir():
+            print(f"Vault is not a directory: {args.vault}", file=sys.stderr)
+            return 2
+        if not args.page.exists():
+            print(f"Page does not exist: {args.page}", file=sys.stderr)
+            return 2
+
+        print(render_plan(plan_maintenance(args.page, args.vault)))
         return 0
 
     parser.error("Unknown command")

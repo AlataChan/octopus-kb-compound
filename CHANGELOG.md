@@ -11,6 +11,7 @@
 - `impacted-pages` CLI command for deterministic maintenance impact discovery.
 - Version bump to `0.2.0` for the expanded public CLI and metadata/lint contract.
 - Deterministic retrieval bundle helpers for schema, index, concept, entity, and raw-source traversal.
+- Non-mutating maintenance planner and `plan-maintenance` CLI command for follow-up actions.
 
 ## v0.1.0 - 2026-04-05
 

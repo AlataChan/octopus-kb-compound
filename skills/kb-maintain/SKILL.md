@@ -18,6 +18,8 @@ Maintain the wiki as a living artifact. Every change should improve structure, e
 5. Update frontmatter, summaries, wikilinks, and index/log entries together.
 6. Run lint to catch broken links, orphans, and missing metadata.
 
+When available, use `octopus_kb_compound.planner.plan_maintenance()` or the `plan-maintenance` CLI command before editing pages. Treat the plan as guidance; it should not mutate the vault by itself.
+
 ## Rules
 
 - Never edit raw-source files beyond frontmatter normalization unless explicitly requested.

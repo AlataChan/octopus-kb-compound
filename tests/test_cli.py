@@ -12,7 +12,15 @@ def test_cli_parser_includes_existing_baseline_commands():
     )
     commands = set(subparsers_action.choices)
 
-    assert {"lint", "suggest-links", "ingest-url", "ingest-file", "vault-summary", "impacted-pages"} <= commands
+    assert {
+        "lint",
+        "suggest-links",
+        "ingest-url",
+        "ingest-file",
+        "vault-summary",
+        "impacted-pages",
+        "plan-maintenance",
+    } <= commands
 
 
 def test_cli_lint_missing_vault_returns_error(tmp_path: Path, capsys):
@@ -104,3 +112,22 @@ def test_cli_impacted_pages_reports_related_pages(tmp_path: Path, capsys):
     assert "wiki/INDEX.md" in captured.out
     assert "wiki/LOG.md" in captured.out
     assert "wiki/entities/Vector Store.md" in captured.out
+
+
+def test_cli_plan_maintenance_reports_actions(tmp_path: Path, capsys):
+    raw = tmp_path / "raw" / "source.md"
+    index = tmp_path / "wiki" / "INDEX.md"
+    log = tmp_path / "wiki" / "LOG.md"
+    for path in (raw, index, log):
+        path.parent.mkdir(parents=True, exist_ok=True)
+    raw.write_text("---\ntitle: Source\nrole: raw_source\nlayer: source\n---\n", encoding="utf-8")
+    index.write_text("---\ntitle: INDEX\nrole: index\nlayer: wiki\nsummary: Index\n---\n", encoding="utf-8")
+    log.write_text("---\ntitle: LOG\nrole: log\nlayer: wiki\nsummary: Log\n---\n", encoding="utf-8")
+
+    exit_code = main(["plan-maintenance", str(raw), "--vault", str(tmp_path)])
+
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "changed_page\traw/source.md" in captured.out
+    assert "action\tupdate" in captured.out
