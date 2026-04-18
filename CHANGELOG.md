@@ -5,6 +5,7 @@
 ### Added
 
 - Add PageMeta JSON Schema as a shared validation floor and ship it as package data.
+- Add runtime frontmatter schema validation helpers.
 
 ## [0.2.1] - 2026-04-17
 
