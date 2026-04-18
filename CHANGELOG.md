@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## [0.2.1] - 2026-04-17
+
 ### Fixed
 
 - fix: gate canonical identity for raw sources; add wiki path-stem fallback.
