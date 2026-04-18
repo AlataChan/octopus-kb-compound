@@ -4,6 +4,8 @@
 
 ### Added
 
+- Add `lookup` CLI command with decision-level JSON output.
+
 ## [0.3.0] - 2026-04-18
 
 ### Added

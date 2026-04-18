@@ -12,6 +12,7 @@ from octopus_kb_compound.impact import find_impacted_pages
 from octopus_kb_compound.ingest import OptionalDependencyMissing
 from octopus_kb_compound.links import suggest_links
 from octopus_kb_compound.lint import lint_pages
+from octopus_kb_compound.lookup import lookup_term
 from octopus_kb_compound.migrate import inspect_vault_for_migration, normalize_vault, render_migration_report
 from octopus_kb_compound.planner import plan_maintenance, render_plan
 from octopus_kb_compound.profile import load_vault_profile
@@ -72,6 +73,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     validate_frontmatter_parser.add_argument("path", type=Path)
     validate_frontmatter_parser.add_argument("--json", action="store_true")
+
+    lookup_parser = subparsers.add_parser("lookup", help="Resolve a term to a canonical page or alias collision.")
+    lookup_parser.add_argument("term")
+    lookup_parser.add_argument("--vault", required=True, type=Path)
+    lookup_parser.add_argument("--json", action="store_true")
     return parser
 
 
@@ -236,6 +242,18 @@ def main(argv: list[str] | None = None) -> int:
                 )
         return 1 if findings else 0
 
+    if args.command == "lookup":
+        rc = _validate_vault_dir(args.vault)
+        if rc is not None:
+            return rc
+
+        result = lookup_term(args.term, args.vault)
+        if args.json:
+            print(json.dumps(result.to_dict(), ensure_ascii=False))
+        else:
+            _print_lookup_result(result.to_dict())
+        return 0
+
     parser.error("Unknown command")
     return 2
 
@@ -262,6 +280,18 @@ def _validate_page_file(page: Path) -> int | None:
 
 def _parse_tags(raw_tags: str) -> list[str]:
     return [tag.strip() for tag in raw_tags.split(",") if tag.strip()]
+
+
+def _print_lookup_result(result: dict) -> None:
+    canonical = result["canonical"]
+    if canonical is not None:
+        print(f"canonical\t{canonical['path']}")
+    for alias in result["aliases"]:
+        print(f"alias\t{alias['text']}\t{alias['resolves_to']}")
+    for collision in result["collisions"]:
+        print(f"collision\t{collision}")
+    for command in result["next"]:
+        print(f"next\t{command}")
 
 
 def _collect_frontmatter_findings(path: Path) -> list[dict[str, str]]:

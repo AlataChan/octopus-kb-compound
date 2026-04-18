@@ -24,6 +24,7 @@ def test_cli_parser_includes_existing_baseline_commands():
         "normalize-vault",
         "export-graph",
         "validate-frontmatter",
+        "lookup",
     } <= commands
 
 

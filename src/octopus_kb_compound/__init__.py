@@ -1,5 +1,6 @@
 """octopus-kb-compound core package."""
 
+from octopus_kb_compound.lookup import LookupResult, lookup_term
 from octopus_kb_compound.schema import (
     SchemaFinding,
     load_page_meta_schema,
@@ -7,6 +8,7 @@ from octopus_kb_compound.schema import (
 )
 
 __all__ = [
+    "LookupResult",
     "SchemaFinding",
     "export",
     "frontmatter",
@@ -14,6 +16,8 @@ __all__ = [
     "ingest",
     "links",
     "lint",
+    "lookup",
+    "lookup_term",
     "migrate",
     "models",
     "page_types",
