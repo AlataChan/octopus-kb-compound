@@ -8,6 +8,7 @@
 - Add eval task suite format and loader.
 - Add grep and octopus-kb eval path runners.
 - Add deterministic eval scoring and suite runner.
+- Add `eval run` and `eval report` CLI commands.
 
 ## [0.5.0] - 2026-04-18
 

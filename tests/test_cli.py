@@ -31,6 +31,7 @@ def test_cli_parser_includes_existing_baseline_commands():
         "validate",
         "recover",
         "inbox",
+        "eval",
     } <= commands
 
 
@@ -391,3 +392,39 @@ def test_cli_validate_frontmatter_exits_0_when_clean(tmp_path):
 
     rc = main(["validate-frontmatter", str(vault)])
     assert rc == 0
+
+
+def test_cli_eval_run_produces_summary_and_deterministic_json(tmp_path):
+    import json
+
+    from octopus_kb_compound.cli import main
+
+    out = tmp_path / "run"
+    rc = main(["eval", "run", "--tasks", "eval/tasks.yaml", "--out", str(out)])
+    assert rc == 0
+    assert (out / "summary.md").exists()
+    task_files = list(out.glob("*.json"))
+    assert any(p.stem.startswith("fact-") for p in task_files)
+    sample = next(p for p in task_files if not p.name.endswith(".metrics.json"))
+    data = json.loads(sample.read_text(encoding="utf-8"))
+    assert "results" in data
+
+
+def test_cli_eval_report_rerenders_summary_from_prior_run(tmp_path):
+    import re as _re
+
+    from octopus_kb_compound.cli import main
+
+    out = tmp_path / "run"
+    assert main(["eval", "run", "--tasks", "eval/tasks.yaml", "--out", str(out)]) == 0
+
+    # Remove summary, re-generate from task files.
+    (out / "summary.md").unlink()
+    rc = main(["eval", "report", "--run", str(out), "--format", "markdown"])
+    assert rc == 0
+    summary = (out / "summary.md").read_text(encoding="utf-8")
+    # Frozen format: lowercase header columns, no timestamps.
+    assert "| task_id | type | grep_score | octopus_score |" in summary
+    assert "Total tasks:" in summary
+    # No ISO timestamp lines.
+    assert not _re.search(r"\d{4}-\d{2}-\d{2}T\d{2}:", summary)

@@ -139,6 +139,16 @@ def build_parser() -> argparse.ArgumentParser:
     inbox_parser.add_argument("--reject", action="store_true")
     inbox_parser.add_argument("--reason", default="")
     inbox_parser.add_argument("--json", action="store_true")
+
+    eval_parser = subparsers.add_parser("eval", help="Run or report deterministic eval suites.")
+    eval_subparsers = eval_parser.add_subparsers(dest="eval_command", required=True)
+    eval_run_parser = eval_subparsers.add_parser("run", help="Run an eval task suite.")
+    eval_run_parser.add_argument("--tasks", required=True, type=Path)
+    eval_run_parser.add_argument("--out", required=True, type=Path)
+    eval_run_parser.add_argument("--json", action="store_true")
+    eval_report_parser = eval_subparsers.add_parser("report", help="Render a summary for a prior eval run.")
+    eval_report_parser.add_argument("--run", required=True, type=Path)
+    eval_report_parser.add_argument("--format", choices=["markdown"], default="markdown")
     return parser
 
 
@@ -456,6 +466,45 @@ def main(argv: list[str] | None = None) -> int:
             _print_inbox_result(result)
         return 0
 
+    if args.command == "eval":
+        if args.eval_command == "run":
+            if not args.tasks.exists() or not args.tasks.is_file():
+                print(f"Tasks file does not exist: {args.tasks}", file=sys.stderr)
+                return 2
+            try:
+                from octopus_kb_compound.eval.runner import run_suite
+
+                result = run_suite(args.tasks, args.out)
+            except Exception as exc:
+                print(str(exc), file=sys.stderr)
+                return 1
+            payload = {
+                "summary_path": str(result["summary_path"]),
+                "task_count": len(result["task_jsons"]),
+                "out_dir": str(args.out),
+            }
+            if args.json:
+                print(json.dumps(payload, ensure_ascii=False))
+            else:
+                print(f"summary: {payload['summary_path']}")
+                print(f"tasks: {payload['task_count']}")
+            return 0
+
+        if args.eval_command == "report":
+            if not args.run.exists():
+                print(f"Run directory does not exist: {args.run}", file=sys.stderr)
+                return 2
+            if not args.run.is_dir():
+                print(f"Run path is not a directory: {args.run}", file=sys.stderr)
+                return 2
+            try:
+                summary_path = _render_eval_report(args.run)
+            except Exception as exc:
+                print(str(exc), file=sys.stderr)
+                return 1
+            print(f"summary: {summary_path}")
+            return 0
+
     parser.error("Unknown command")
     return 2
 
@@ -586,6 +635,45 @@ def _print_inbox_result(result: dict) -> None:
             print(f"rule\t{rule['rule_id']}\t{rule['verdict']}\t{rule['reason']}")
         return
     _print_apply_result(result)
+
+
+def _render_eval_report(run_dir: Path) -> Path:
+    task_files = sorted(
+        path
+        for path in run_dir.glob("*.json")
+        if not path.name.endswith(".metrics.json")
+    )
+    rows: list[dict] = []
+    for task_file in task_files:
+        data = json.loads(task_file.read_text(encoding="utf-8"))
+        if not isinstance(data, dict):
+            continue
+        rows.append(data)
+
+    lines = [
+        "# Eval Summary",
+        "",
+        "Tasks file: <unknown>",
+        "Corpus: <unknown>",
+        f"Total tasks: {len(rows)}",
+        "",
+        "| task_id | type | grep_score | octopus_score |",
+        "|---|---|---|---|",
+    ]
+    for row in sorted(rows, key=lambda item: str(item.get("task_id", ""))):
+        scores = {
+            result.get("path_name"): float(result.get("deterministic_score", 0.0))
+            for result in row.get("results", [])
+            if isinstance(result, dict)
+        }
+        lines.append(
+            f"| {row.get('task_id', '')} | {row.get('task_type', '')} | "
+            f"{scores.get('grep', 0.0):.2f} | {scores.get('octopus-kb', 0.0):.2f} |"
+        )
+
+    summary_path = run_dir / "summary.md"
+    summary_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return summary_path
 
 
 def _collect_frontmatter_findings(path: Path) -> list[dict[str, str]]:
