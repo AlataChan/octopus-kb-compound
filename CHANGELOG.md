@@ -7,6 +7,7 @@
 - Add minimal OpenAI-compatible LLM client and config loader.
 - Add proposal schema and atomic append-only storage.
 - Add declarative YAML validator chain for proposal rule gates.
+- Add `propose` CLI command with one-shot non-JSON retry and provenance override.
 
 ## [0.4.0] - 2026-04-18
 

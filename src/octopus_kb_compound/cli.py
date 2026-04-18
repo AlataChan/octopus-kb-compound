@@ -17,6 +17,11 @@ from octopus_kb_compound.migrate import inspect_vault_for_migration, normalize_v
 from octopus_kb_compound.neighbors import compute_neighbors
 from octopus_kb_compound.planner import plan_maintenance, render_plan
 from octopus_kb_compound.profile import load_vault_profile
+from octopus_kb_compound.propose import (
+    ProposeInputError,
+    ProposeRuntimeError,
+    propose_from_raw,
+)
 import octopus_kb_compound.retrieve as retrieve_mod
 from octopus_kb_compound.retrieve import build_retrieval_bundle
 from octopus_kb_compound.schema import validate_frontmatter
@@ -97,6 +102,12 @@ def build_parser() -> argparse.ArgumentParser:
     neighbors_parser.add_argument("page", type=Path)
     neighbors_parser.add_argument("--vault", required=True, type=Path)
     neighbors_parser.add_argument("--json", action="store_true")
+
+    propose_parser = subparsers.add_parser("propose", help="Ask an LLM to propose safe KB changes from a raw source.")
+    propose_parser.add_argument("raw_file", type=Path)
+    propose_parser.add_argument("--vault", required=True, type=Path)
+    propose_parser.add_argument("--profile")
+    propose_parser.add_argument("--json", action="store_true")
     return parser
 
 
@@ -329,6 +340,28 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps(data, ensure_ascii=False))
         else:
             _print_neighbors_result(data)
+        return 0
+
+    if args.command == "propose":
+        try:
+            result = propose_from_raw(
+                args.raw_file,
+                args.vault,
+                profile_name=args.profile,
+            ).to_dict()
+        except ProposeInputError as exc:
+            print(str(exc), file=sys.stderr)
+            return 2
+        except ProposeRuntimeError as exc:
+            print(str(exc), file=sys.stderr)
+            return 1
+
+        if args.json:
+            print(json.dumps(result, ensure_ascii=False))
+        else:
+            print(f"proposal_id: {result['proposal_id']}")
+            print(f"path: {result['path']}")
+            print(f"operations: {result['operations']}")
         return 0
 
     parser.error("Unknown command")

@@ -27,6 +27,7 @@ def test_cli_parser_includes_existing_baseline_commands():
         "lookup",
         "retrieve-bundle",
         "neighbors",
+        "propose",
     } <= commands
 
 
