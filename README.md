@@ -1,8 +1,23 @@
 # octopus-kb-compound
 
-Open-source framework for building self-growing, self-maintaining LLM knowledge bases and Obsidian knowledge graphs.
+octopus-kb is the agent's operating procedure for Obsidian-style knowledge bases. Instead of letting agents grep your vault, the CLI returns decisions: canonical identity, ordered evidence bundles, graph context, and impact plans.
 
-`octopus-kb-compound` is for teams and individuals who want something stronger than ad-hoc RAG. Instead of re-deriving knowledge from raw documents on every query, the LLM maintains a persistent wiki with frontmatter, wikilinks, concept pages, and health checks.
+```bash
+octopus-kb retrieve-bundle 'rag ops' --vault . --json
+octopus-kb lookup 'RAG Ops' --vault . --json
+octopus-kb neighbors 'wiki/concepts/RAG Operations.md' --vault . --json
+octopus-kb impacted-pages 'wiki/concepts/RAG Operations.md' --vault . --json
+octopus-kb lint . --json
+```
+
+## Install as a Skill
+
+- Claude Code: copy or reference `skills/kb/SKILL.md`, then install the optional grep guard from `examples/hooks/` using `docs/hooks/claude-code-pretooluse.md`.
+- Codex: add `skills/kb/SKILL.md` to your Codex skills directory and use the recipes in `skills/kb/recipes/`.
+
+The full CLI reference remains below.
+
+`octopus-kb-compound` is for teams and individuals who want something stronger than ad-hoc RAG. Instead of re-deriving knowledge from raw documents on every query, the agent maintains a persistent wiki with frontmatter, wikilinks, concept pages, and health checks.
 
 This repository packages four operator-facing assets:
 
@@ -89,10 +104,13 @@ The skill treats the wiki as a living artifact, not a pile of notes.
 ## What The CLI Does
 
 - `ingest-url <url> --vault <path> [--tags tag1,tag2] [--lang zh]`: fetch a public URL through Jina Reader and write a new `raw/*.md` page
-- `lint <vault>`: find broken links, orphan concept pages, and missing metadata
+- `lookup <term> --vault <vault> [--json]`: resolve a term to a canonical page, alias, or ambiguity report
+- `retrieve-bundle <query> --vault <vault> [--max-tokens N] [--json]`: return schema-first ordered evidence for an agent task
+- `neighbors <page> --vault <vault> [--json]`: return inbound links, outbound links, aliases, and canonical identity for a page
+- `lint <vault> [--json]`: find broken links, orphan concept pages, and missing metadata
 - `suggest-links <page> --vault <vault>`: propose canonical wikilinks for an existing page
 - `vault-summary <vault>`: report page counts, entry-file presence, and lint finding counts
-- `impacted-pages <page> --vault <vault>`: list pages likely affected by a page change
+- `impacted-pages <page> --vault <vault> [--json]`: list pages likely affected by a page change
 - `plan-maintenance <page> --vault <vault>`: emit non-mutating follow-up actions for wiki maintenance
 - `inspect-vault <vault>` / `normalize-vault <vault>`: inspect and stage conservative migration fixes
 - `export-graph <vault> --out <dir>`: write `nodes.json`, `edges.json`, `manifest.json`, and `aliases.json`

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## [0.4.0] - 2026-04-18
+
 ### Added
 
 - Add `lookup` CLI command with decision-level JSON output.
@@ -11,6 +13,10 @@
 - Add `--json` output and schema for `impacted-pages`.
 - Add `kb` skill with SOP and slash recipes.
 - Add Claude Code PreToolUse hook with deterministic retrieve-bundle marker guard.
+
+### Fixed
+
+- Accept vault-relative page paths in `impacted-pages`.
 
 ## [0.3.0] - 2026-04-18
 

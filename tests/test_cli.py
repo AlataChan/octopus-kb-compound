@@ -197,6 +197,25 @@ def test_cli_impacted_pages_json_output(tmp_path):
     jsonschema.validate(data, json.loads(schema_path.read_text(encoding="utf-8")))
 
 
+def test_cli_impacted_pages_accepts_vault_relative_page_path(tmp_path):
+    vault = tmp_path / "vault"
+    (vault / "wiki").mkdir(parents=True)
+    (vault / "AGENTS.md").write_text("# Schema\n", encoding="utf-8")
+    (vault / "wiki" / "INDEX.md").write_text(
+        "---\ntitle: INDEX\nrole: index\nlayer: wiki\nsummary: Index\n---\n",
+        encoding="utf-8",
+    )
+    (vault / "wiki" / "LOG.md").write_text(
+        "---\ntitle: LOG\nrole: log\nlayer: wiki\nsummary: Log\n---\n",
+        encoding="utf-8",
+    )
+
+    from octopus_kb_compound.cli import main
+
+    rc = main(["impacted-pages", "wiki/INDEX.md", "--vault", str(vault), "--json"])
+    assert rc == 0
+
+
 def test_cli_plan_maintenance_reports_actions(tmp_path: Path, capsys):
     raw = tmp_path / "raw" / "source.md"
     index = tmp_path / "wiki" / "INDEX.md"

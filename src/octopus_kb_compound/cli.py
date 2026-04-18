@@ -193,13 +193,12 @@ def main(argv: list[str] | None = None) -> int:
         rc = _validate_vault_dir(args.vault)
         if rc is not None:
             return rc
-        rc = _validate_page_file(args.page)
-        if rc is not None:
-            return rc
+        page = _resolve_page_in_vault(args.page, args.vault)
+        if page is None:
+            return 2
 
-        impacted = find_impacted_pages(args.page, args.vault)
+        impacted = find_impacted_pages(page, args.vault)
         if args.json:
-            page = _relative_path_for_output(args.page, args.vault)
             print(
                 json.dumps(
                     {

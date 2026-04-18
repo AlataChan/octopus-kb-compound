@@ -21,6 +21,16 @@
 - Add export paths for graph-aware retrieval systems and GraphRAG pipelines.
 - Offer templates for team workflows, not just solo vaults.
 
+## 0.4.0 Decision-Output and Skill Shelf (2026-04-18)
+
+Phase C makes the CLI usable as an agent operating procedure instead of a loose collection of terminal helpers:
+
+- Added decision-first CLI verbs for `lookup`, `retrieve-bundle`, and `neighbors`.
+- Added `--json` output to `lint` and `impacted-pages` for agent consumers.
+- Agent-facing CLI commands now have JSON Schemas under `schemas/cli/` with `additionalProperties: false`.
+- Added `skills/kb/SKILL.md` with an opinionated Operating Procedure that requires retrieval, lookup, impact checks, graph context, and lint before edits finish.
+- Added a Claude Code PreToolUse hook under `examples/hooks/` that soft-blocks grep on `wiki/` and `raw/` until `retrieve-bundle` has run in the current turn.
+
 ## 0.3.0 Frontmatter Schema (2026-04-18)
 
 Phase 0 adds a shared PageMeta validation floor for humans, agents, and third-party tooling:
