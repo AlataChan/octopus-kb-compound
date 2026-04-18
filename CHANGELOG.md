@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+- Add minimal OpenAI-compatible LLM client and config loader.
+
 ## [0.4.0] - 2026-04-18
 
 ### Added
