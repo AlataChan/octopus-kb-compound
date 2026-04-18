@@ -13,6 +13,10 @@ from octopus_kb_compound.models import PageMeta
 _MAX_RESPONSE_BYTES = 5 * 1024 * 1024
 
 
+class OptionalDependencyMissing(RuntimeError):
+    pass
+
+
 def _validate_url(url: str) -> None:
     parsed = urlparse(url)
     if parsed.scheme not in ("http", "https"):
@@ -65,7 +69,7 @@ def convert_file_to_markdown(file_path: str) -> tuple[str, dict[str, str]]:
     try:
         from markitdown import MarkItDown
     except ImportError as exc:
-        raise RuntimeError(
+        raise OptionalDependencyMissing(
             "markitdown is required for file conversion. "
             "Install with: pip install octopus-kb-compound[ingest]"
         ) from exc

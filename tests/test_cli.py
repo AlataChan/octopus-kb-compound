@@ -160,3 +160,50 @@ def test_cli_export_graph_writes_artifacts(tmp_path: Path):
     assert exit_code == 0
     assert (out_dir / "nodes.json").exists()
     assert (out_dir / "edges.json").exists()
+
+
+def test_cli_export_graph_returns_2_when_out_collides_with_file(tmp_path):
+    vault = tmp_path / "vault"
+    (vault / "wiki").mkdir(parents=True)
+    out_file = tmp_path / "out.json"
+    out_file.write_text("{}", encoding="utf-8")
+
+    from octopus_kb_compound.cli import main
+    rc = main(["export-graph", str(vault), "--out", str(out_file)])
+    assert rc == 2
+
+
+def test_cli_impacted_pages_returns_2_when_page_is_directory(tmp_path):
+    vault = tmp_path / "vault"
+    (vault / "wiki").mkdir(parents=True)
+
+    from octopus_kb_compound.cli import main
+    rc = main(["impacted-pages", str(vault / "wiki"), "--vault", str(vault)])
+    assert rc == 2
+
+
+def test_cli_plan_maintenance_returns_2_when_page_is_directory(tmp_path):
+    vault = tmp_path / "vault"
+    (vault / "wiki").mkdir(parents=True)
+
+    from octopus_kb_compound.cli import main
+    rc = main(["plan-maintenance", str(vault / "wiki"), "--vault", str(vault)])
+    assert rc == 2
+
+
+def test_cli_ingest_file_returns_1_when_markitdown_missing(tmp_path, monkeypatch):
+    vault = tmp_path / "vault"
+    vault.mkdir()
+    source = tmp_path / "doc.txt"
+    source.write_text("hello", encoding="utf-8")
+
+    import octopus_kb_compound.ingest as ingest_module
+
+    def raise_missing(_path):
+        raise ingest_module.OptionalDependencyMissing("markitdown is required")
+
+    monkeypatch.setattr(ingest_module, "convert_file_to_markdown", raise_missing)
+
+    from octopus_kb_compound.cli import main
+    rc = main(["ingest-file", str(source), "--vault", str(vault)])
+    assert rc == 1

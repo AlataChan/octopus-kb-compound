@@ -7,6 +7,7 @@ import sys
 from octopus_kb_compound import ingest
 from octopus_kb_compound.export import export_graph_artifacts
 from octopus_kb_compound.impact import find_impacted_pages
+from octopus_kb_compound.ingest import OptionalDependencyMissing
 from octopus_kb_compound.links import suggest_links
 from octopus_kb_compound.lint import lint_pages
 from octopus_kb_compound.migrate import inspect_vault_for_migration, normalize_vault, render_migration_report
@@ -69,12 +70,9 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     if args.command == "lint":
-        if not args.vault.exists():
-            print(f"Vault does not exist: {args.vault}", file=sys.stderr)
-            return 2
-        if not args.vault.is_dir():
-            print(f"Vault is not a directory: {args.vault}", file=sys.stderr)
-            return 2
+        rc = _validate_vault_dir(args.vault)
+        if rc is not None:
+            return rc
         profile = load_vault_profile(args.vault)
         pages = scan_markdown_files(args.vault, profile)
         findings = lint_pages(pages)
@@ -83,15 +81,12 @@ def main(argv: list[str] | None = None) -> int:
         return 1 if findings else 0
 
     if args.command == "suggest-links":
-        if not args.vault.exists():
-            print(f"Vault does not exist: {args.vault}", file=sys.stderr)
-            return 2
-        if not args.vault.is_dir():
-            print(f"Vault is not a directory: {args.vault}", file=sys.stderr)
-            return 2
-        if not args.page.exists():
-            print(f"Page does not exist: {args.page}", file=sys.stderr)
-            return 2
+        rc = _validate_vault_dir(args.vault)
+        if rc is not None:
+            return rc
+        rc = _validate_page_file(args.page)
+        if rc is not None:
+            return rc
         profile = load_vault_profile(args.vault)
         pages = scan_markdown_files(args.vault, profile)
         target_page = load_page(args.page, root=args.vault)
@@ -101,12 +96,9 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.command == "ingest-url":
-        if not args.vault.exists():
-            print(f"Vault does not exist: {args.vault}", file=sys.stderr)
-            return 2
-        if not args.vault.is_dir():
-            print(f"Vault is not a directory: {args.vault}", file=sys.stderr)
-            return 2
+        rc = _validate_vault_dir(args.vault)
+        if rc is not None:
+            return rc
 
         try:
             body, metadata = ingest.fetch_url_as_markdown(args.url)
@@ -125,18 +117,12 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.command == "ingest-file":
-        if not args.vault.exists():
-            print(f"Vault does not exist: {args.vault}", file=sys.stderr)
-            return 2
-        if not args.vault.is_dir():
-            print(f"Vault is not a directory: {args.vault}", file=sys.stderr)
-            return 2
-        if not args.path.exists():
-            print(f"File does not exist: {args.path}", file=sys.stderr)
-            return 2
-        if not args.path.is_file():
-            print(f"Path is not a file: {args.path}", file=sys.stderr)
-            return 2
+        rc = _validate_vault_dir(args.vault)
+        if rc is not None:
+            return rc
+        rc = _validate_page_file(args.path)
+        if rc is not None:
+            return rc
 
         try:
             body, metadata = ingest.convert_file_to_markdown(str(args.path))
@@ -147,6 +133,9 @@ def main(argv: list[str] | None = None) -> int:
                 lang=args.lang,
                 tags=_parse_tags(args.tags),
             )
+        except OptionalDependencyMissing as exc:
+            print(str(exc), file=sys.stderr)
+            return 1
         except (OSError, RuntimeError, ValueError) as exc:
             print(str(exc), file=sys.stderr)
             return 2
@@ -155,63 +144,48 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.command == "vault-summary":
-        if not args.vault.exists():
-            print(f"Vault does not exist: {args.vault}", file=sys.stderr)
-            return 2
-        if not args.vault.is_dir():
-            print(f"Vault is not a directory: {args.vault}", file=sys.stderr)
-            return 2
+        rc = _validate_vault_dir(args.vault)
+        if rc is not None:
+            return rc
 
         print(render_summary(summarize_vault(args.vault)))
         return 0
 
     if args.command == "impacted-pages":
-        if not args.vault.exists():
-            print(f"Vault does not exist: {args.vault}", file=sys.stderr)
-            return 2
-        if not args.vault.is_dir():
-            print(f"Vault is not a directory: {args.vault}", file=sys.stderr)
-            return 2
-        if not args.page.exists():
-            print(f"Page does not exist: {args.page}", file=sys.stderr)
-            return 2
+        rc = _validate_vault_dir(args.vault)
+        if rc is not None:
+            return rc
+        rc = _validate_page_file(args.page)
+        if rc is not None:
+            return rc
 
         for path in find_impacted_pages(args.page, args.vault):
             print(path)
         return 0
 
     if args.command == "plan-maintenance":
-        if not args.vault.exists():
-            print(f"Vault does not exist: {args.vault}", file=sys.stderr)
-            return 2
-        if not args.vault.is_dir():
-            print(f"Vault is not a directory: {args.vault}", file=sys.stderr)
-            return 2
-        if not args.page.exists():
-            print(f"Page does not exist: {args.page}", file=sys.stderr)
-            return 2
+        rc = _validate_vault_dir(args.vault)
+        if rc is not None:
+            return rc
+        rc = _validate_page_file(args.page)
+        if rc is not None:
+            return rc
 
         print(render_plan(plan_maintenance(args.page, args.vault)))
         return 0
 
     if args.command == "inspect-vault":
-        if not args.vault.exists():
-            print(f"Vault does not exist: {args.vault}", file=sys.stderr)
-            return 2
-        if not args.vault.is_dir():
-            print(f"Vault is not a directory: {args.vault}", file=sys.stderr)
-            return 2
+        rc = _validate_vault_dir(args.vault)
+        if rc is not None:
+            return rc
         report = inspect_vault_for_migration(args.vault)
         print(render_migration_report(report))
         return 2 if report.parse_failures else 0
 
     if args.command == "normalize-vault":
-        if not args.vault.exists():
-            print(f"Vault does not exist: {args.vault}", file=sys.stderr)
-            return 2
-        if not args.vault.is_dir():
-            print(f"Vault is not a directory: {args.vault}", file=sys.stderr)
-            return 2
+        rc = _validate_vault_dir(args.vault)
+        if rc is not None:
+            return rc
         try:
             report = normalize_vault(args.vault, apply=args.apply, in_place=args.in_place)
         except OSError as exc:
@@ -221,11 +195,11 @@ def main(argv: list[str] | None = None) -> int:
         return 2 if report.parse_failures else 0
 
     if args.command == "export-graph":
-        if not args.vault.exists():
-            print(f"Vault does not exist: {args.vault}", file=sys.stderr)
-            return 2
-        if not args.vault.is_dir():
-            print(f"Vault is not a directory: {args.vault}", file=sys.stderr)
+        rc = _validate_vault_dir(args.vault)
+        if rc is not None:
+            return rc
+        if args.out.exists() and not args.out.is_dir():
+            print(f"Out path is not a directory: {args.out}", file=sys.stderr)
             return 2
         try:
             export_graph_artifacts(args.vault, args.out)
@@ -237,6 +211,26 @@ def main(argv: list[str] | None = None) -> int:
 
     parser.error("Unknown command")
     return 2
+
+
+def _validate_vault_dir(vault: Path) -> int | None:
+    if not vault.exists():
+        print(f"Vault does not exist: {vault}", file=sys.stderr)
+        return 2
+    if not vault.is_dir():
+        print(f"Vault is not a directory: {vault}", file=sys.stderr)
+        return 2
+    return None
+
+
+def _validate_page_file(page: Path) -> int | None:
+    if not page.exists():
+        print(f"Page does not exist: {page}", file=sys.stderr)
+        return 2
+    if not page.is_file():
+        print(f"Page is not a file: {page}", file=sys.stderr)
+        return 2
+    return None
 
 
 def _parse_tags(raw_tags: str) -> list[str]:
