@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+- Add committed reference corpus for the eval harness.
+
 ## [0.5.0] - 2026-04-18
 
 ### Added
