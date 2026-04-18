@@ -12,7 +12,9 @@ license = {text = "MIT"}
 authors = [
   {name = "Apple"}
 ]
-dependencies = []
+dependencies = [
+  "jsonschema>=4.18",
+]
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
@@ -24,3 +26,6 @@ octopus-kb = "octopus_kb_compound.cli:main"
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
+
+[tool.setuptools.package-data]
+octopus_kb_compound = ["_schemas/*.json"]
