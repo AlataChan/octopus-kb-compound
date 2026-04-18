@@ -29,6 +29,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     lint_parser = subparsers.add_parser("lint", help="Lint a vault for broken links and metadata gaps.")
     lint_parser.add_argument("vault", type=Path)
+    lint_parser.add_argument("--json", action="store_true")
 
     suggest_parser = subparsers.add_parser("suggest-links", help="Suggest wikilinks for a page using a vault index.")
     suggest_parser.add_argument("page", type=Path)
@@ -108,8 +109,11 @@ def main(argv: list[str] | None = None) -> int:
         profile = load_vault_profile(args.vault)
         pages = scan_markdown_files(args.vault, profile)
         findings = lint_pages(pages)
-        for finding in findings:
-            print(f"{finding.code}\t{finding.path}\t{finding.message}")
+        if args.json:
+            print(json.dumps({"findings": [_lint_finding_to_dict(finding) for finding in findings]}, ensure_ascii=False))
+        else:
+            for finding in findings:
+                print(f"{finding.code}\t{finding.path}\t{finding.message}")
         return 1 if findings else 0
 
     if args.command == "suggest-links":
@@ -327,6 +331,14 @@ def _validate_page_file(page: Path) -> int | None:
         print(f"Page is not a file: {page}", file=sys.stderr)
         return 2
     return None
+
+
+def _lint_finding_to_dict(finding) -> dict[str, str]:
+    return {
+        "code": finding.code,
+        "path": finding.path,
+        "message": finding.message,
+    }
 
 
 def _resolve_page_in_vault(page: Path, vault: Path) -> str | None:

@@ -7,6 +7,7 @@
 - Add `lookup` CLI command with decision-level JSON output.
 - Add `retrieve-bundle` CLI command with ordered evidence JSON output.
 - Add `neighbors` CLI command with graph context JSON output.
+- Add `--json` output for `lint` for agent consumers.
 
 ## [0.3.0] - 2026-04-18
 

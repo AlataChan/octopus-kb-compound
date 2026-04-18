@@ -69,6 +69,43 @@ def test_cli_lint_uses_profile_to_exclude_directories(tmp_path: Path, capsys):
     assert "noise.md" not in captured.out
 
 
+def test_cli_lint_json_output(tmp_path):
+    import io
+    import json
+    import sys
+
+    import jsonschema
+
+    vault = tmp_path / "vault"
+    (vault / "wiki" / "concepts").mkdir(parents=True)
+    (vault / "AGENTS.md").write_text("# Schema\n", encoding="utf-8")
+    (vault / "wiki" / "INDEX.md").write_text("# Index\n", encoding="utf-8")
+    (vault / "wiki" / "LOG.md").write_text("# Log\n", encoding="utf-8")
+    (vault / "wiki" / "concepts" / "Bad.md").write_text(
+        '---\ntitle: "Bad"\ntype: concept\nlang: en\nrole: not-a-real-role\n'
+        'layer: wiki\nsummary: "s"\ntags: []\n---\n',
+        encoding="utf-8",
+    )
+
+    from octopus_kb_compound.cli import main
+
+    buf = io.StringIO()
+    original = sys.stdout
+    sys.stdout = buf
+    try:
+        rc = main(["lint", str(vault), "--json"])
+    finally:
+        sys.stdout = original
+    assert rc == 1
+    data = json.loads(buf.getvalue())
+    assert "findings" in data and isinstance(data["findings"], list)
+    codes = {f["code"] for f in data["findings"]}
+    assert "SCHEMA_INVALID_FIELD" in codes
+
+    schema_path = Path(__file__).resolve().parent.parent / "schemas" / "cli" / "lint.json"
+    jsonschema.validate(data, json.loads(schema_path.read_text(encoding="utf-8")))
+
+
 def test_cli_vault_summary_reports_structure(tmp_path: Path, capsys):
     concept = tmp_path / "wiki" / "concepts" / "RAG.md"
     raw = tmp_path / "raw" / "source.md"
