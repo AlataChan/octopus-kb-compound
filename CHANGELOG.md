@@ -10,6 +10,7 @@
 - Add `--json` output for `lint` for agent consumers.
 - Add `--json` output and schema for `impacted-pages`.
 - Add `kb` skill with SOP and slash recipes.
+- Add Claude Code PreToolUse hook with deterministic retrieve-bundle marker guard.
 
 ## [0.3.0] - 2026-04-18
 

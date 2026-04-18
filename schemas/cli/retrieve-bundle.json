@@ -1,6 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "octopus-kb/cli/retrieve-bundle",
+  "description": "Successful retrieve-bundle CLI runs touch .octopus-kb/.retrieve-bundle-marker so Claude Code hooks can tell that retrieval happened before Grep.",
   "type": "object",
   "required": ["query", "bundle", "warnings", "token_estimate", "next"],
   "additionalProperties": false,

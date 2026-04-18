@@ -17,6 +17,7 @@ from octopus_kb_compound.migrate import inspect_vault_for_migration, normalize_v
 from octopus_kb_compound.neighbors import compute_neighbors
 from octopus_kb_compound.planner import plan_maintenance, render_plan
 from octopus_kb_compound.profile import load_vault_profile
+import octopus_kb_compound.retrieve as retrieve_mod
 from octopus_kb_compound.retrieve import build_retrieval_bundle
 from octopus_kb_compound.schema import validate_frontmatter
 from octopus_kb_compound.summary import render_summary, summarize_vault
@@ -300,6 +301,10 @@ def main(argv: list[str] | None = None) -> int:
         bundle = build_retrieval_bundle(
             args.vault, args.query, max_tokens=args.max_tokens
         )
+        try:
+            retrieve_mod._touch_marker(args.vault)
+        except OSError as exc:
+            print(f"warning: could not touch retrieve-bundle marker: {exc}", file=sys.stderr)
         data = bundle.to_dict()
         if args.json:
             print(json.dumps(data, ensure_ascii=False))

@@ -213,3 +213,40 @@ def test_retrieve_bundle_output_matches_schema(tmp_path):
         sys.stdout = original
 
     jsonschema.validate(json.loads(buf.getvalue()), schema)
+
+
+def test_retrieve_bundle_touches_marker_file(tmp_path):
+    vault = tmp_path / "vault"
+    (vault / "wiki").mkdir(parents=True)
+    (vault / "AGENTS.md").write_text("# Schema\n", encoding="utf-8")
+    (vault / "wiki" / "INDEX.md").write_text("# Index\n", encoding="utf-8")
+    (vault / "wiki" / "LOG.md").write_text("# Log\n", encoding="utf-8")
+
+    from octopus_kb_compound.cli import main
+
+    rc = main(["retrieve-bundle", "anything", "--vault", str(vault), "--json"])
+    assert rc == 0
+    marker = vault / ".octopus-kb" / ".retrieve-bundle-marker"
+    assert marker.exists()
+
+
+def test_retrieve_bundle_still_succeeds_when_marker_write_fails(tmp_path, monkeypatch, capsys):
+    vault = tmp_path / "vault"
+    (vault / "wiki").mkdir(parents=True)
+    (vault / "AGENTS.md").write_text("# Schema\n", encoding="utf-8")
+    (vault / "wiki" / "INDEX.md").write_text("# Index\n", encoding="utf-8")
+    (vault / "wiki" / "LOG.md").write_text("# Log\n", encoding="utf-8")
+
+    import octopus_kb_compound.retrieve as retrieve_mod
+
+    def always_fail(_path):
+        raise OSError("permission denied")
+
+    monkeypatch.setattr(retrieve_mod, "_touch_marker", always_fail)
+
+    from octopus_kb_compound.cli import main
+
+    rc = main(["retrieve-bundle", "x", "--vault", str(vault), "--json"])
+    assert rc == 0
+    captured = capsys.readouterr()
+    assert "marker" in captured.err.lower() or "warning" in captured.err.lower()

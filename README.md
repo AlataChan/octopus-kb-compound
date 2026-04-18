@@ -104,6 +104,10 @@ The skill treats the wiki as a living artifact, not a pile of notes.
 
 `schemas/page-meta.json` is a JSON Schema document that defines the valid PageMeta shape for vault frontmatter. Run `octopus-kb validate-frontmatter examples/minimal-vault` to check a vault directly; the same schema findings also appear in `octopus-kb lint` output alongside link and graph-health findings.
 
+## Make Claude Actually Use This
+
+Install the optional Claude Code PreToolUse hook in `docs/hooks/claude-code-pretooluse.md` to remind agents to run `octopus-kb retrieve-bundle ... --json` before grepping `wiki/` or `raw/`. The hook uses the marker file touched by successful `retrieve-bundle` runs and is advisory only.
+
 ## Example Vault
 
 `examples/minimal-vault/` shows the intended shape of a vault. `examples/expanded-vault/` adds concept, entity, comparison, timeline, log, and raw-source pages for end-to-end operator workflows.

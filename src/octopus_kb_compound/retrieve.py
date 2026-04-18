@@ -95,6 +95,12 @@ def build_retrieval_bundle(
     return bundle
 
 
+def _touch_marker(vault: Path) -> None:
+    marker = vault / ".octopus-kb" / ".retrieve-bundle-marker"
+    marker.parent.mkdir(parents=True, exist_ok=True)
+    marker.touch()
+
+
 def _first_path_by_role_or_path(
     pages: list[PageRecord], role: str, fallback_path: str
 ) -> str | None:
