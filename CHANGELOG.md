@@ -4,6 +4,10 @@
 
 ### Added
 
+## [0.3.0] - 2026-04-18
+
+### Added
+
 - Add PageMeta JSON Schema as a shared validation floor and ship it as package data.
 - Add runtime frontmatter schema validation helpers.
 - Emit frontmatter schema findings from `lint_pages`.

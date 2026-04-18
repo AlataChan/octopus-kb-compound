@@ -96,8 +96,13 @@ The skill treats the wiki as a living artifact, not a pile of notes.
 - `plan-maintenance <page> --vault <vault>`: emit non-mutating follow-up actions for wiki maintenance
 - `inspect-vault <vault>` / `normalize-vault <vault>`: inspect and stage conservative migration fixes
 - `export-graph <vault> --out <dir>`: write `nodes.json`, `edges.json`, `manifest.json`, and `aliases.json`
+- `validate-frontmatter <path> [--json]`: strictly parse frontmatter and report PageMeta schema findings
 
 `ingest-url` uses `https://r.jina.ai/` as a third-party conversion service. Only public `http/https` URLs are allowed, and the command rejects localhost and private-network targets.
+
+## Validation
+
+`schemas/page-meta.json` is a JSON Schema document that defines the valid PageMeta shape for vault frontmatter. Run `octopus-kb validate-frontmatter examples/minimal-vault` to check a vault directly; the same schema findings also appear in `octopus-kb lint` output alongside link and graph-health findings.
 
 ## Example Vault
 

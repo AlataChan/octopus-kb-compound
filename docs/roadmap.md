@@ -21,6 +21,16 @@
 - Add export paths for graph-aware retrieval systems and GraphRAG pipelines.
 - Offer templates for team workflows, not just solo vaults.
 
+## 0.3.0 Frontmatter Schema (2026-04-18)
+
+Phase 0 adds a shared PageMeta validation floor for humans, agents, and third-party tooling:
+
+- PageMeta is now defined by a JSON Schema document and shipped as package data from `src/octopus_kb_compound/_schemas/`.
+- The runtime validator module exposes `validate_frontmatter()` and `SchemaFinding` for schema-only checks.
+- `lint_pages` now emits `SCHEMA_MISSING_FIELD`, `SCHEMA_INVALID_FIELD`, and `SCHEMA_INVALID_CONDITIONAL` alongside existing lint codes.
+- The CLI includes `octopus-kb validate-frontmatter <path> [--json]` for strict frontmatter validation of files or vaults.
+- `jsonschema>=4.18` is now a required runtime dependency.
+
 ## 0.2.1 Remediation (2026-04-17)
 
 Applied the Codex 2026-04-17 review findings on the 0.2.0 roadmap release:
