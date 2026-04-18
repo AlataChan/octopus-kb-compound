@@ -251,7 +251,7 @@ def test_convert_file_to_markdown_raises_without_markitdown(tmp_path: Path, monk
     monkeypatch.delitem(sys.modules, "markitdown", raising=False)
     monkeypatch.setattr(builtins, "__import__", fake_import)
 
-    with pytest.raises(RuntimeError, match=r"pip install octopus-kb-compound\[ingest\]"):
+    with pytest.raises(RuntimeError, match=r"pip install octopus-kb\[ingest\]"):
         ingest.convert_file_to_markdown(str(source_file))
 
 

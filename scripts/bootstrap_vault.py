@@ -12,7 +12,7 @@ DEFAULT_EXCLUDES = [
     ".workbuddy/**",
     "docs/**",
     "output/**",
-    "octopus-kb-compound/**",
+    "octopus-kb/**",
     "copilot/**",
     "Excalidraw/**",
     "meta/**",
@@ -20,7 +20,7 @@ DEFAULT_EXCLUDES = [
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Bootstrap an existing markdown vault for octopus-kb-compound.")
+    parser = argparse.ArgumentParser(description="Bootstrap an existing markdown vault for octopus-kb.")
     parser.add_argument("vault_root", type=Path)
     parser.add_argument("--schema", default="wiki/LLM_wiki.md")
     parser.add_argument("--index", default="wiki/INDEX.md")

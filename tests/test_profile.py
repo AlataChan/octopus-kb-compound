@@ -11,7 +11,7 @@ def test_load_vault_profile_reads_flat_yaml_lists(tmp_path: Path):
                 "index: wiki/INDEX.md",
                 "exclude_globs:",
                 "  - output/**",
-                "  - octopus-kb-compound/**",
+                "  - octopus-kb/**",
             ]
         ),
         encoding="utf-8",
@@ -21,4 +21,4 @@ def test_load_vault_profile_reads_flat_yaml_lists(tmp_path: Path):
 
     assert profile.schema == "wiki/LLM_wiki.md"
     assert profile.index == "wiki/INDEX.md"
-    assert profile.exclude_globs == ["output/**", "octopus-kb-compound/**"]
+    assert profile.exclude_globs == ["output/**", "octopus-kb/**"]

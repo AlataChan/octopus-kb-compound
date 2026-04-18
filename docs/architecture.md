@@ -1,6 +1,6 @@
 # Architecture
 
-`octopus-kb-compound` is designed around three layers:
+`octopus-kb` is designed around three layers:
 
 - raw sources
 - generated wiki pages

@@ -42,7 +42,7 @@ def fetch_url_as_markdown(url: str, *, timeout: int = 30) -> tuple[str, dict[str
         f"https://r.jina.ai/{url}",
         headers={
             "Accept": "text/markdown",
-            "User-Agent": "octopus-kb-compound/0.1",
+            "User-Agent": "octopus-kb/0.6",
         },
     )
 
@@ -71,7 +71,7 @@ def convert_file_to_markdown(file_path: str) -> tuple[str, dict[str, str]]:
     except ImportError as exc:
         raise OptionalDependencyMissing(
             "markitdown is required for file conversion. "
-            "Install with: pip install octopus-kb-compound[ingest]"
+            "Install with: pip install octopus-kb[ingest]"
         ) from exc
 
     source_path = Path(file_path)

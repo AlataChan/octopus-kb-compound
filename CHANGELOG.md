@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed
+
+- Rename the public project and distribution name to `octopus-kb` while keeping the Python import namespace unchanged.
+
 ## [0.6.0] - 2026-04-18
 
 ### Added

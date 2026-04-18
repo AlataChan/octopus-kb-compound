@@ -1,4 +1,4 @@
-# octopus-kb-compound
+# octopus-kb
 
 > The agent's operating procedure for Obsidian-style knowledge bases.
 
@@ -23,7 +23,7 @@ No LLM vendor lock-in. Any OpenAI-compatible endpoint works (local Ollama, DeepS
 
 ```bash
 git clone <this-repo>
-cd octopus-kb-compound
+cd octopus-kb
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e '.[dev]'

@@ -1,1 +1,1 @@
-"""Test package for octopus-kb-compound."""
+"""Test package for octopus-kb."""

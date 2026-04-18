@@ -1,4 +1,4 @@
-"""octopus-kb-compound core package."""
+"""octopus-kb core package."""
 
 from octopus_kb_compound.lookup import LookupResult, lookup_term
 from octopus_kb_compound.neighbors import NeighborsResult, compute_neighbors

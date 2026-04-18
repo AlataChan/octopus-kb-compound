@@ -2,7 +2,7 @@
 
 ## Scope
 
-`octopus-kb-compound` is a framework repo, not a personal vault. Contributions should improve reusable skills, prompts, CLI behavior, or example assets that help other people build durable markdown knowledge bases.
+`octopus-kb` is a framework repo, not a personal vault. Contributions should improve reusable skills, prompts, CLI behavior, or example assets that help other people build durable markdown knowledge bases.
 
 ## Preferred Contribution Types
 

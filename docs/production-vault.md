@@ -1,6 +1,6 @@
 # Production Vaults
 
-A production vault is an existing Obsidian knowledge base that adopts the `octopus-kb-compound` operating model without becoming a toy example.
+A production vault is an existing Obsidian knowledge base that adopts the `octopus-kb` operating model without becoming a toy example.
 
 ## Required Entry Files
 
@@ -26,7 +26,7 @@ index: wiki/INDEX.md
 exclude_globs:
   - .obsidian/**
   - output/**
-  - octopus-kb-compound/**
+  - octopus-kb/**
 ```
 
 ## Bootstrap

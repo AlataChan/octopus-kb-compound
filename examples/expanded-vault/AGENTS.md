@@ -7,7 +7,7 @@ layer: wiki
 tags:
   - AI/Wiki
 summary: |
-  Expanded schema for team-oriented octopus-kb-compound workflows.
+  Expanded schema for team-oriented octopus-kb workflows.
 ---
 
 # Expanded Vault Schema
