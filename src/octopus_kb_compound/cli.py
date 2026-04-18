@@ -16,6 +16,12 @@ from octopus_kb_compound.export import export_graph_artifacts
 from octopus_kb_compound.frontmatter import FrontmatterError, parse_document
 from octopus_kb_compound.impact import find_impacted_pages
 from octopus_kb_compound.ingest import OptionalDependencyMissing
+from octopus_kb_compound.inbox import (
+    accept_inbox,
+    list_inbox,
+    reject_inbox,
+    review_inbox,
+)
 from octopus_kb_compound.links import suggest_links
 from octopus_kb_compound.lint import lint_pages
 from octopus_kb_compound.lookup import lookup_term
@@ -124,6 +130,15 @@ def build_parser() -> argparse.ArgumentParser:
     recover_parser = subparsers.add_parser("recover", help="Recover a proposal apply interrupted mid-commit.")
     recover_parser.add_argument("proposal_id")
     recover_parser.add_argument("--vault", required=True, type=Path)
+
+    inbox_parser = subparsers.add_parser("inbox", help="List, review, accept, or reject deferred proposals.")
+    inbox_parser.add_argument("--vault", required=True, type=Path)
+    inbox_parser.add_argument("--list", action="store_true")
+    inbox_parser.add_argument("--review")
+    inbox_parser.add_argument("--accept", action="store_true")
+    inbox_parser.add_argument("--reject", action="store_true")
+    inbox_parser.add_argument("--reason", default="")
+    inbox_parser.add_argument("--json", action="store_true")
     return parser
 
 
@@ -412,6 +427,35 @@ def main(argv: list[str] | None = None) -> int:
         _print_apply_result(result)
         return 0
 
+    if args.command == "inbox":
+        try:
+            if args.list:
+                result = list_inbox(args.vault)
+            elif args.review and args.accept:
+                result = accept_inbox(args.vault, args.review).to_dict()
+            elif args.review and args.reject:
+                if not args.reason:
+                    print("--reason is required with --reject", file=sys.stderr)
+                    return 2
+                result = reject_inbox(args.vault, args.review, args.reason)
+            elif args.review:
+                result = review_inbox(args.vault, args.review)
+            else:
+                print("Use --list or --review <id>", file=sys.stderr)
+                return 2
+        except ValidateInputError as exc:
+            print(str(exc), file=sys.stderr)
+            return 2
+        except ValidateRuntimeError as exc:
+            print(str(exc), file=sys.stderr)
+            return 1
+
+        if args.json:
+            print(json.dumps(result, ensure_ascii=False))
+        else:
+            _print_inbox_result(result)
+        return 0
+
     parser.error("Unknown command")
     return 2
 
@@ -524,6 +568,24 @@ def _print_apply_result(result: dict) -> None:
         print(f"message\t{result['message']}")
     for rule in result.get("rule_results", []):
         print(f"rule\t{rule['rule_id']}\t{rule['verdict']}\t{rule['reason']}")
+
+
+def _print_inbox_result(result: dict) -> None:
+    if "deferred" in result:
+        for item in result["deferred"]:
+            print(
+                f"deferred\t{item['id']}\t{item.get('created_at') or ''}\t"
+                f"{item.get('reason') or ''}\t{item.get('operations') or 0}"
+            )
+        print(f"count\t{result['count']}")
+        return
+    if "current_verdict" in result:
+        print(f"proposal\t{result['proposal_id']}")
+        print(f"verdict\t{result['current_verdict']}")
+        for rule in result.get("rule_results", []):
+            print(f"rule\t{rule['rule_id']}\t{rule['verdict']}\t{rule['reason']}")
+        return
+    _print_apply_result(result)
 
 
 def _collect_frontmatter_findings(path: Path) -> list[dict[str, str]]:
