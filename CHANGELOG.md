@@ -6,6 +6,7 @@
 
 - fix: gate canonical identity for raw sources; add wiki path-stem fallback.
 - fix: quote user/content-derived frontmatter scalars and list items.
+- fix: dedupe graph export alias nodes, emit related entity edges, and roll back failed artifact commits.
 
 ### Added
 

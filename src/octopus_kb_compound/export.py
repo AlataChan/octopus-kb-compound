@@ -1,12 +1,18 @@
 from __future__ import annotations
 
 import json
+import os
+import shutil
+import tempfile
 from pathlib import Path
 
 from octopus_kb_compound.links import build_alias_index, extract_wikilinks, frontmatter_aliases, normalize_page_name
 from octopus_kb_compound.models import PageRecord
 from octopus_kb_compound.profile import load_vault_profile
 from octopus_kb_compound.vault import scan_markdown_files
+
+
+ARTIFACT_NAMES = ("nodes.json", "edges.json", "manifest.json", "aliases.json")
 
 
 def export_graph_artifacts(vault: str | Path, out_dir: str | Path) -> None:
@@ -21,17 +27,52 @@ def export_graph_artifacts(vault: str | Path, out_dir: str | Path) -> None:
     edges = _edges(pages, alias_index, node_ids)
     manifest = {"pages": [page.path for page in pages]}
 
-    _write_json(output / "nodes.json", nodes)
-    _write_json(output / "edges.json", edges)
-    _write_json(output / "manifest.json", manifest)
-    _write_json(output / "aliases.json", alias_index)
+    with tempfile.TemporaryDirectory(prefix="octopus-export-", dir=str(output.parent)) as workspace:
+        staging = Path(workspace) / "staging"
+        staging.mkdir()
+        _write_json(staging / "nodes.json", nodes)
+        _write_json(staging / "edges.json", edges)
+        _write_json(staging / "manifest.json", manifest)
+        _write_json(staging / "aliases.json", alias_index)
+
+        backup_dir = Path(workspace) / "backup"
+        backup_dir.mkdir()
+        pre_existing: dict[str, bool] = {}
+        for name in ARTIFACT_NAMES:
+            target = output / name
+            pre_existing[name] = target.exists()
+            if target.exists():
+                shutil.copy2(target, backup_dir / name)
+
+        committed: list[str] = []
+        try:
+            for name in ARTIFACT_NAMES:
+                _commit_artifact(staging / name, output / name)
+                committed.append(name)
+        except OSError:
+            for name in committed:
+                backup = backup_dir / name
+                target = output / name
+                if pre_existing.get(name) and backup.exists():
+                    shutil.copy2(backup, target)
+                else:
+                    try:
+                        target.unlink()
+                    except FileNotFoundError:
+                        pass
+            raise
+
+
+def _commit_artifact(src: Path, dst: Path) -> None:
+    os.replace(src, dst)
 
 
 def _nodes(pages: list[PageRecord]) -> list[dict]:
-    result: list[dict] = []
+    page_nodes: list[dict] = []
+    alias_nodes: dict[str, dict] = {}
     for page in pages:
         aliases = frontmatter_aliases(page)
-        result.append(
+        page_nodes.append(
             {
                 "id": _page_id(page),
                 "title": page.title,
@@ -42,17 +83,16 @@ def _nodes(pages: list[PageRecord]) -> list[dict]:
             }
         )
         for alias in aliases:
-            result.append(
-                {
-                    "id": _alias_id(alias),
-                    "title": alias,
-                    "type": "alias",
-                    "role": None,
-                    "layer": None,
-                    "aliases": [],
-                }
-            )
-    return result
+            node = {
+                "id": _alias_id(alias),
+                "title": alias,
+                "type": "alias",
+                "role": None,
+                "layer": None,
+                "aliases": [],
+            }
+            alias_nodes.setdefault(node["id"], node)
+    return page_nodes + list(alias_nodes.values())
 
 
 def _edges(pages: list[PageRecord], alias_index: dict[str, str], node_ids: set[str]) -> list[dict]:
@@ -66,6 +106,17 @@ def _edges(pages: list[PageRecord], alias_index: dict[str, str], node_ids: set[s
             if target is None:
                 continue
             edges.append({"source": source, "target": _page_id(target), "relation_type": "wikilink"})
+
+        related = page.frontmatter.get("related_entities") or []
+        if isinstance(related, list):
+            for entity in related:
+                if not isinstance(entity, str):
+                    continue
+                target_title = alias_index.get(normalize_page_name(entity))
+                target = by_title.get(target_title or "")
+                if target is None or target.path == page.path:
+                    continue
+                edges.append({"source": source, "target": _page_id(target), "relation_type": "wikilink"})
 
         for alias in frontmatter_aliases(page):
             alias_node = _alias_id(alias)
