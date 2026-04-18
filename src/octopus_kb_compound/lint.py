@@ -11,10 +11,26 @@ from octopus_kb_compound.links import (
     normalize_page_name,
 )
 from octopus_kb_compound.models import LintFinding, PageRecord
+from octopus_kb_compound.schema import validate_frontmatter
 
 
 def lint_pages(pages: list[PageRecord]) -> list[LintFinding]:
+    """Return schema findings plus legacy cross-page lint findings.
+
+    `MISSING_ROLE` and `MISSING_SUMMARY` remain for backward compatibility;
+    they are legacy equivalents of schema missing-field findings.
+    """
     findings: list[LintFinding] = []
+    for page in pages:
+        for sf in validate_frontmatter(page.frontmatter):
+            findings.append(
+                LintFinding(
+                    code=sf.code,
+                    path=page.path,
+                    message=f"{sf.field}: {sf.message}",
+                )
+            )
+
     alias_index = build_alias_index(pages)
     title_lookup = {page.title: page for page in pages}
     inbound_counts = {page.path: 0 for page in pages}

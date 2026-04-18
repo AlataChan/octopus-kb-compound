@@ -79,6 +79,64 @@ def test_lint_detects_missing_summary_and_role():
 
     assert any(f.code == "MISSING_ROLE" for f in findings)
     assert any(f.code == "MISSING_SUMMARY" for f in findings)
+    assert any(f.code == "SCHEMA_MISSING_FIELD" and f.message.startswith("role:") for f in findings)
+    assert any(
+        f.code in {"SCHEMA_MISSING_FIELD", "SCHEMA_INVALID_CONDITIONAL"}
+        and f.message.startswith("summary:")
+        for f in findings
+    )
+
+
+def test_lint_emits_schema_findings_for_invalid_role_value():
+    page = PageRecord(
+        path="wiki/x.md",
+        title="x",
+        frontmatter={
+            "title": "x",
+            "type": "concept",
+            "lang": "en",
+            "role": "not-a-real-role",
+            "layer": "wiki",
+            "summary": "s",
+        },
+        body="",
+    )
+    findings = lint_pages([page])
+    codes = {f.code for f in findings}
+    assert "SCHEMA_INVALID_FIELD" in codes
+
+
+def test_lint_still_emits_existing_codes_unchanged():
+    a = PageRecord(
+        path="wiki/a.md",
+        title="Shared",
+        frontmatter={
+            "title": "Shared",
+            "type": "concept",
+            "lang": "en",
+            "role": "concept",
+            "layer": "wiki",
+            "summary": "s",
+            "source_of_truth": "canonical",
+        },
+        body="",
+    )
+    b = PageRecord(
+        path="wiki/b.md",
+        title="Shared",
+        frontmatter={
+            "title": "Shared",
+            "type": "concept",
+            "lang": "en",
+            "role": "concept",
+            "layer": "wiki",
+            "summary": "s",
+            "source_of_truth": "canonical",
+        },
+        body="",
+    )
+    findings = lint_pages([a, b])
+    assert any(f.code == "DUPLICATE_CANONICAL_PAGE" for f in findings)
 
 
 def test_lint_resolves_alias_links_without_false_broken_or_orphan():
