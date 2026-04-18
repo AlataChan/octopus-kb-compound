@@ -11,7 +11,15 @@ def test_lint_detects_broken_links():
             path="wiki/concepts/Agent设计模式.md",
             title="Agent设计模式",
             body="See [[Missing Page]].",
-            frontmatter={"role": "concept", "layer": "wiki", "tags": ["AI/Agent"]},
+            frontmatter={
+                "title": "Agent设计模式",
+                "type": "concept",
+                "lang": "zh",
+                "role": "concept",
+                "layer": "wiki",
+                "tags": ["AI/Agent"],
+                "summary": "Agent design patterns.",
+            },
         ),
     ]
 
@@ -26,13 +34,29 @@ def test_lint_detects_orphan_pages():
             path="wiki/concepts/Agent设计模式.md",
             title="Agent设计模式",
             body="",
-            frontmatter={"role": "concept", "layer": "wiki", "tags": ["AI/Agent"], "summary": "Agent design patterns."},
+            frontmatter={
+                "title": "Agent设计模式",
+                "type": "concept",
+                "lang": "zh",
+                "role": "concept",
+                "layer": "wiki",
+                "tags": ["AI/Agent"],
+                "summary": "Agent design patterns.",
+            },
         ),
         PageRecord(
             path="wiki/INDEX.md",
             title="INDEX",
             body="",
-            frontmatter={"role": "index", "layer": "wiki", "tags": ["AI/Wiki"], "summary": "Entry point."},
+            frontmatter={
+                "title": "INDEX",
+                "type": "meta",
+                "lang": "en",
+                "role": "index",
+                "layer": "wiki",
+                "tags": ["AI/Wiki"],
+                "summary": "Entry point.",
+            },
         ),
     ]
 
@@ -63,13 +87,28 @@ def test_lint_resolves_alias_links_without_false_broken_or_orphan():
             path="wiki/concepts/RAG and Knowledge Augmentation.md",
             title="RAG and Knowledge Augmentation",
             body="",
-            frontmatter={"role": "concept", "layer": "wiki", "summary": "RAG overview.", "aliases": ["RAG"]},
+            frontmatter={
+                "title": "RAG and Knowledge Augmentation",
+                "type": "concept",
+                "lang": "en",
+                "role": "concept",
+                "layer": "wiki",
+                "summary": "RAG overview.",
+                "aliases": ["RAG"],
+            },
         ),
         PageRecord(
             path="wiki/INDEX.md",
             title="INDEX",
             body="See [[RAG]].",
-            frontmatter={"role": "index", "layer": "wiki", "summary": "Entry point."},
+            frontmatter={
+                "title": "INDEX",
+                "type": "meta",
+                "lang": "en",
+                "role": "index",
+                "layer": "wiki",
+                "summary": "Entry point.",
+            },
         ),
     ]
 
@@ -84,13 +123,29 @@ def test_lint_reports_alias_collisions():
             path="wiki/entities/PageA.md",
             title="Page A",
             body="",
-            frontmatter={"role": "entity", "layer": "wiki", "summary": "A", "aliases": ["Shared Alias"]},
+            frontmatter={
+                "title": "Page A",
+                "type": "entity",
+                "lang": "en",
+                "role": "entity",
+                "layer": "wiki",
+                "summary": "A",
+                "aliases": ["Shared Alias"],
+            },
         ),
         PageRecord(
             path="wiki/entities/PageB.md",
             title="Page B",
             body="",
-            frontmatter={"role": "entity", "layer": "wiki", "summary": "B", "aliases": ["Shared Alias"]},
+            frontmatter={
+                "title": "Page B",
+                "type": "entity",
+                "lang": "en",
+                "role": "entity",
+                "layer": "wiki",
+                "summary": "B",
+                "aliases": ["Shared Alias"],
+            },
         ),
     ]
 
@@ -107,6 +162,8 @@ def test_lint_reports_duplicate_canonical_pages():
             body="",
             frontmatter={
                 "title": "RAG",
+                "type": "concept",
+                "lang": "en",
                 "role": "concept",
                 "layer": "wiki",
                 "summary": "RAG overview.",
@@ -119,6 +176,8 @@ def test_lint_reports_duplicate_canonical_pages():
             body="",
             frontmatter={
                 "title": "Retrieval Augmented Generation",
+                "type": "concept",
+                "lang": "en",
                 "role": "concept",
                 "layer": "wiki",
                 "summary": "Duplicate overview.",
@@ -140,6 +199,8 @@ def test_lint_reports_unresolved_frontmatter_alias():
             body="",
             frontmatter={
                 "title": "Vector Store",
+                "type": "entity",
+                "lang": "en",
                 "role": "entity",
                 "layer": "wiki",
                 "summary": "Vector store.",
@@ -161,6 +222,8 @@ def test_lint_reports_canonical_alias_collision():
             body="",
             frontmatter={
                 "title": "Vector Store",
+                "type": "entity",
+                "lang": "en",
                 "role": "entity",
                 "layer": "wiki",
                 "summary": "Vector store.",
@@ -174,6 +237,8 @@ def test_lint_reports_canonical_alias_collision():
             body="[[Vector Store]]",
             frontmatter={
                 "title": "Chunking",
+                "type": "entity",
+                "lang": "en",
                 "role": "entity",
                 "layer": "wiki",
                 "summary": "Chunking.",
@@ -193,6 +258,8 @@ def test_canonical_key_ignores_raw_source_with_canonical_name_only():
         title="Example",
         frontmatter={
             "title": "Example",
+            "type": "raw_source",
+            "lang": "en",
             "role": "raw_source",
             "layer": "source",
             "canonical_name": "Example",
@@ -204,8 +271,11 @@ def test_canonical_key_ignores_raw_source_with_canonical_name_only():
         title="Example",
         frontmatter={
             "title": "Example",
+            "type": "concept",
+            "lang": "en",
             "role": "concept",
             "layer": "wiki",
+            "summary": "Example concept.",
             "source_of_truth": "canonical",
         },
         body="",
@@ -218,13 +288,26 @@ def test_canonical_key_path_stem_fallback_triggers_for_wiki_pages_without_title(
     titleless_wiki = PageRecord(
         path="wiki/concepts/example.md",
         title="",
-        frontmatter={"role": "concept", "layer": "wiki"},
+        frontmatter={
+            "type": "concept",
+            "lang": "en",
+            "role": "concept",
+            "layer": "wiki",
+            "summary": "Example concept.",
+        },
         body="",
     )
     named_wiki = PageRecord(
         path="wiki/concepts/other.md",
         title="example",
-        frontmatter={"title": "example", "role": "concept", "layer": "wiki"},
+        frontmatter={
+            "title": "example",
+            "type": "concept",
+            "lang": "en",
+            "role": "concept",
+            "layer": "wiki",
+            "summary": "Example concept.",
+        },
         body="",
     )
     findings = lint_pages([titleless_wiki, named_wiki])
@@ -239,6 +322,8 @@ def test_canonical_key_honors_raw_source_that_opts_into_canonical():
         title="Example",
         frontmatter={
             "title": "Example",
+            "type": "raw_source",
+            "lang": "en",
             "role": "raw_source",
             "layer": "source",
             "source_of_truth": "canonical",
@@ -250,8 +335,11 @@ def test_canonical_key_honors_raw_source_that_opts_into_canonical():
         title="Example",
         frontmatter={
             "title": "Example",
+            "type": "concept",
+            "lang": "en",
             "role": "concept",
             "layer": "wiki",
+            "summary": "Example concept.",
             "source_of_truth": "canonical",
         },
         body="",
@@ -268,19 +356,40 @@ def test_lint_resolves_filename_and_relative_path_links():
             path="Agent相关论文/REACT_ SYNERGIZING REASONING AND ACTING IN LANGUAGE MODELS-2023.3.md",
             title="ReAct Paper",
             body="",
-            frontmatter={"role": "raw_source", "layer": "source", "summary": "ReAct source."},
+            frontmatter={
+                "title": "ReAct Paper",
+                "type": "raw_source",
+                "lang": "en",
+                "role": "raw_source",
+                "layer": "source",
+                "summary": "ReAct source.",
+            },
         ),
         PageRecord(
             path="wiki/concepts/Agent设计模式.md",
             title="Agent设计模式",
             body="[[Agent相关论文/REACT_ SYNERGIZING REASONING AND ACTING IN LANGUAGE MODELS-2023.3.md]]",
-            frontmatter={"role": "concept", "layer": "wiki", "summary": "Agent patterns."},
+            frontmatter={
+                "title": "Agent设计模式",
+                "type": "concept",
+                "lang": "zh",
+                "role": "concept",
+                "layer": "wiki",
+                "summary": "Agent patterns.",
+            },
         ),
         PageRecord(
             path="wiki/INDEX.md",
             title="INDEX",
             body="[[Agent设计模式]]",
-            frontmatter={"role": "index", "layer": "wiki", "summary": "Index."},
+            frontmatter={
+                "title": "INDEX",
+                "type": "meta",
+                "lang": "en",
+                "role": "index",
+                "layer": "wiki",
+                "summary": "Index.",
+            },
         ),
     ]
 
@@ -302,7 +411,14 @@ def test_lint_ignores_folderish_and_code_block_pseudo_links():
                 "weights = [[0.12, 0.45]]\n"
                 "```\n"
             ),
-            frontmatter={"role": "concept", "layer": "wiki", "summary": "RAG."},
+            frontmatter={
+                "title": "RAG与知识增强",
+                "type": "concept",
+                "lang": "zh",
+                "role": "concept",
+                "layer": "wiki",
+                "summary": "RAG.",
+            },
         ),
     ]
 
