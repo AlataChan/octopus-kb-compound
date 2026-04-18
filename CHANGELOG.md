@@ -10,6 +10,7 @@
 - Add `propose` CLI command with one-shot non-JSON retry and provenance override.
 - Add `validate`/`recover` CLI commands with audit-first staged proposal apply.
 - Add `inbox` CLI command for human exception handling and override audit metadata.
+- Add end-to-end propose-to-audit integration coverage.
 
 ## [0.4.0] - 2026-04-18
 
