@@ -8,6 +8,31 @@
 
 The Python package provides deterministic helpers. Skills and prompts provide the LLM-facing operating model.
 
+## Canonical Knowledge Representation
+
+The v0.7 foundation introduces a Canonical Knowledge Representation (CKR) as an internal projection layer between the curation pipeline and endpoint storage. CKR v1 is deliberately lossless for the current Obsidian implementation: markdown body text, original wikilink text, aliases, frontmatter metadata, and path-backed audit/CLI outputs remain available during the migration.
+
+The core CKR references are:
+
+- `CanonicalRef`: endpoint-neutral identity for a knowledge object.
+- `StorageRef`: adapter-specific storage identity such as `obsidian:wiki/concepts/Foo.md`.
+- `CanonicalPage`: page content plus metadata, aliases, related references, body text, body format, and optional storage identity.
+
+`CanonicalRef` and `StorageRef` stay separate so public CLI paths and audit ledgers can remain stable while future endpoint adapters can use non-path storage ids.
+
+## KnowledgeStore Contract
+
+Endpoint adapters implement the `KnowledgeStore` protocol:
+
+- `list_pages() -> list[CanonicalPage]`
+- `read_page(ref: CanonicalRef | StorageRef) -> CanonicalPage`
+- `resolve_alias(term: str) -> CanonicalRef | None`
+- `apply_ops(ops) -> WriteReceipt`
+
+`WriteReceipt` reports created and modified `StorageRef`s. The Obsidian adapter uses those refs to preserve the existing audit ledger shape (`created`, `modified`, and staging paths). Future adapters can map their native ids into `StorageRef` without leaking them into current CLI JSON contracts.
+
+During v0.7, existing modules such as `frontmatter.py`, `links.py`, and `vault.py` remain compatibility shims while callers migrate behind the adapter boundary.
+
 ## Retrieval Path
 
 Every retrieval operation should prefer the persistent wiki first:
